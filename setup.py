@@ -23,12 +23,12 @@ if sys.version_info < (2, 7):
     extra_requirements = ('argparse',)
 
 setup(
-    name='flask-sqlacodegen',
-    description='Automatic model code generator for SQLAlchemy with Flask support',
+    name='Flask-RESTfulCodegen',
+    description='Automatic model code and resource generator for SQLAlchemy with Flask support',
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     version=sqlacodegen.version,
-    author='Kamil Sindi',
+    author='iDeal-ncepu',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -37,7 +37,6 @@ setup(
         'Topic :: Database',
         'Topic :: Software Development :: Code Generators',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
@@ -45,8 +44,10 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
-    keywords=['sqlalchemy', 'sqlacodegen', 'flask'],
+    keywords=['sqlalchemy', 'sqlacodegen', 'flask','flask-restful'],
     license='MIT',
     packages=find_packages(exclude=['tests']),
     install_requires=(

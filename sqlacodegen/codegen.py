@@ -1,4 +1,5 @@
 """Contains the code generation logic and helper functions."""
+
 from __future__ import unicode_literals, division, print_function, absolute_import
 from collections import defaultdict
 from inspect import ArgSpec
@@ -654,6 +655,7 @@ class CodeGenerator(object):
             self.collector.add_literal_import('sqlalchemy', 'MetaData')
 
     def render(self, outfile=sys.stdout):
+
         print(self.header, file=outfile)
 
         # Render the collected imports

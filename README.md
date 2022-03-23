@@ -1,9 +1,10 @@
-# Flask sqlacodegen
+# Flask-RESTfulCodegen
 
-Fork of [sqlacodegen](https://pypi.python.org/pypi/sqlacodegen) by Alex Gronholm. Based off of version 1.1.6.
+Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
 What's different:
-
+* Support for generate Resource layer,include RESTful API based Flask-RESTful.
+* Support for generate Model layer.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
 * Defaults to generating backrefs in relationships. `--nobackref` still included as option in case backrefs are not wanted. 
 * Naming of backrefs is class name in snake_case (as opposed to CamelCase) and is pluralized if it's Many-to-One or Many-to-Many using [inflect](https://pypi.python.org/pypi/inflect).
@@ -17,19 +18,19 @@ What's different:
 
 With pip:
 ```sh
-pip install flask-sqlacodegen
+pip install Flask-RESTfulCodegen
 ```
 
 Without pip:
 ```sh
-git clone https://github.com/ksindi/flask-sqlacodegen.git
-cd flask-sqlacodegen/
+git clone https://gitee.com/ncepu-bj/flask-restful-codegen.git
+cd flask-restful-codegen/
 python setup.py install
 ```
 
 For contributing:
 ```sh
-git clone https://github.com/ksindi/flask-sqlacodegen.git
+git clone https://gitee.com/ncepu-bj/flask-restful-codegen.git
 python -m venv env
 pip install -r requirements.txt
 python -m sqlacodegen.main --flask --outfile models.py mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> [--tables <tablenames>] [--notables]
