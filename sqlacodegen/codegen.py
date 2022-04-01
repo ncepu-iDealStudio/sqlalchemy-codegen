@@ -1,12 +1,15 @@
 """Contains the code generation logic and helper functions."""
 
 from __future__ import unicode_literals, division, print_function, absolute_import
+
+import os.path
 from collections import defaultdict
 from inspect import ArgSpec
 from keyword import iskeyword
 import inspect
 import sys
 import re
+from pathlib import Path
 
 from sqlalchemy import (Enum, ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, UniqueConstraint, Table,
                         Column)
@@ -654,25 +657,29 @@ class CodeGenerator(object):
             self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
             self.collector.add_literal_import('sqlalchemy', 'MetaData')
 
-    def render(self, outfile=sys.stdout):
-
-        print(self.header, file=outfile)
-
-        # Render the collected imports
-        print(self.collector.render() + '\n\n', file=outfile)
-
-        if self.flask:
-            print('db = SQLAlchemy()', file=outfile)
-        else:
-            if any(isinstance(model, ModelClass) for model in self.models):
-                print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
-            else:
-                print('metadata = MetaData()', file=outfile)
+    def render(self, outdir):
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
 
         # Render the model tables and classes
         for model in self.models:
-            print('\n\n', file=outfile)
-            print(model.render().rstrip('\n'), file=outfile)
+            outfilename = os.path.join(outdir, f"{model.name}.py")
+            with open(outfilename, "w", encoding="utf-8") as outfile:
+                print(self.header, file=outfile)
 
-        if self.footer:
-            print(self.footer, file=outfile)
+                # Render the collected imports
+                print(self.collector.render() + '\n\n', file=outfile)
+
+                if self.flask:
+                    print('db = SQLAlchemy()', file=outfile)
+                else:
+                    if any(isinstance(model, ModelClass) for model in self.models):
+                        print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
+                    else:
+                        print('metadata = MetaData()', file=outfile)
+
+                print('\n\n', file=outfile)
+                print(model.render().rstrip('\n'), file=outfile)
+
+                if self.footer:
+                    print(self.footer, file=outfile)
