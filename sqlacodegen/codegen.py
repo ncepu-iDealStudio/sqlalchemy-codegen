@@ -663,7 +663,7 @@ class CodeGenerator(object):
 
         # Render the model tables and classes
         for model in self.models:
-            outfilename = os.path.join(outdir, f"{model.name}.py")
+            outfilename = os.path.join(outdir, f"{model.table.name}.py")
             with open(outfilename, "w", encoding="utf-8") as outfile:
                 print(self.header, file=outfile)
 
