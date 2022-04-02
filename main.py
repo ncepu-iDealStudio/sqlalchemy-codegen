@@ -68,9 +68,11 @@ def main():
     generator = SQLCodeGenerator(metadata, args.noindexes, args.noconstraints,
                                  args.nojoined, args.noinflect, args.nobackrefs,
                                  args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+
     if args.models_layer:
         os.makedirs(model_dir := os.path.join(outdir, 'models'), exist_ok=True)
         generator.render(model_dir)
+
     if args.controller_layer:
         os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
         reflection_views = [model.table.name for model in generator.models if type(model) == sqlacodegen.codegen.ModelTable]
@@ -81,7 +83,6 @@ def main():
         generator = ControllerCodeGenerator(table_dict)
         generator.controller_codegen(controller_dir=controller_dir)
         generator.static_generate(outdir, os.path.join(os.curdir, "staticTemplate"))
-
 
 
 if __name__ == '__main__':

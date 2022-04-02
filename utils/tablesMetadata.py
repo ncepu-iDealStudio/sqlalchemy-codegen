@@ -65,11 +65,6 @@ class TableMetadata(object):
                 continue
 
             table_dict[table_name]['is_view'] = False
-            table_dict[table_name]['logical_delete_column'] = ""
-            table_dict[table_name]['business_key_column'] = {}
-
-            # 需要RSA加密的字段
-            table_dict[table_name]['rsa_columns'] = []
 
             from sqlalchemy.engine import reflection
             insp = reflection.Inspector.from_engine(metadata.bind)
@@ -94,15 +89,6 @@ class TableMetadata(object):
                 # 是否自动递增
                 table_dict[table_name]['columns'][str(column.name)][
                     'is_autoincrement'] = True if column.autoincrement is True else False
-
-                # 存在复合主键
-                if len(table_dict[table_name]['primary_key_columns']) > 1:
-                    table_dict[table_name]['business_key_column'] = {}
-                else:
-                    # 如果主键不是自增的，则将业务主键设置为主键
-                    if str(column.name) in table_dict[table_name]['primary_key_columns'] and not \
-                            table_dict[table_name]['columns'][str(column.name)]['is_autoincrement']:
-                        table_dict[table_name]['business_key_column']['column'] = str(column.name)
 
                 # 是否可以为空
                 table_dict[table_name]['columns'][str(column.name)]['nullable'] = column.nullable

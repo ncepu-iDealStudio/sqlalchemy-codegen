@@ -35,7 +35,6 @@ class {class_name}({parent_model}):
     # add
     @classmethod
     def add(cls, **kwargs):
-        {business_key_init}
         try:
             model = {parent_model}(
                 {column_init}
@@ -61,7 +60,7 @@ class {class_name}({parent_model}):
     @classmethod
     def get(cls, **kwargs):
         try:
-            filter_list = [{get_filter_list_logic}]
+            filter_list = []
             {get_filter_list}
             page = int(kwargs.get('Page', 1))
             size = int(kwargs.get('Size', 10))
@@ -167,7 +166,6 @@ class {class_name}({parent_model}):
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
             }}
-            {single_primary_key_result_append}
             res.delete()
             db.session.commit()
 
@@ -213,7 +211,6 @@ class {class_name}({parent_model}):
     @classmethod
     def update(cls, **kwargs):
         try:
-            {rsa_update}
             filter_list = []
             {filter_list_init}
             res = db.session.query(cls).filter(*filter_list).with_for_update()
@@ -241,7 +238,6 @@ class {class_name}({parent_model}):
     @classmethod
     def update(cls, **kwargs):
         try:
-            {rsa_update}
             filter_list = [cls.{logical_delete_mark} == 0]
             {filter_list_init}
             res = db.session.query(cls).filter(*filter_list).with_for_update()
