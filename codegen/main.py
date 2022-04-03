@@ -9,12 +9,12 @@ import sys
 from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
-import modelcodegen
-import modelcodegen.dialects
-from controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
-from modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
-from utils import common
-from utils.tablesMetadata import TableMetadata
+from . import modelcodegen
+from .modelcodegen import dialects
+from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
+from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
+from .utils import common
+from .utils.tablesMetadata import TableMetadata
 
 workPath = common.cur_file_dir()
 
