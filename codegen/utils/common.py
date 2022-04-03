@@ -12,6 +12,10 @@
 
 
 # 连字符转驼峰
+import os
+import sys
+
+
 def str_format_convert(string):
     new_string = ''
     for word in string.split('_'):
@@ -49,6 +53,20 @@ def str_to_big_camel_case(string):
 
     return new_string
 
+
+def cur_file_dir():
+    '''
+    用于找到当前文件的目录
+
+    :return:返回一个绝对路径
+    '''
+    # 获取脚本路径
+    path = sys.path[0]
+    # 判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
+    if os.path.isdir(path):
+        return path
+    elif os.path.isfile(path):
+        return os.path.dirname(path)
 
 if __name__ == '__main__':
     ll = ['user_info', 'userInfo', 'userinfo']

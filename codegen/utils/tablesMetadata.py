@@ -10,13 +10,13 @@
     Get metadata of all tables
 """
 import json
+import os.path
 
 from utils.common import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
 
 
 class TableMetadata(object):
-    with open('config/datatype_map.json', 'r', encoding='utf-8') as f:
-        TYPE_MAPPING = json.load(f)
+    TYPE_MAPPING = ""
 
     @classmethod
     def get_tables_metadata(cls, metadata, reflection_views) -> dict:
@@ -26,6 +26,9 @@ class TableMetadata(object):
             :param reflection_views: 需要反射的视图名称列表
         """
 
+        from main import workPath
+        with open(os.path.join(workPath, 'config/datatype_map.json'), 'r', encoding='utf-8') as f:
+            cls.TYPE_MAPPING = json.load(f)
         # Get all tables object
         table_objs = metadata.tables.values()
         table_dict = {}

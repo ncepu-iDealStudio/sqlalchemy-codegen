@@ -12,8 +12,8 @@
 
 import keyword
 
-from utils.loggings import loggings
-from utils.tablesMetadata import TableMetadata
+from codegen.utils.loggings import loggings
+from codegen.utils.tablesMetadata import TableMetadata
 
 
 class CheckTable(object):

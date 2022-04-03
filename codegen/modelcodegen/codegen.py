@@ -2,21 +2,20 @@
 
 from __future__ import unicode_literals, division, print_function, absolute_import
 
+import inspect
 import os.path
+import re
+import sys
 from collections import defaultdict
 from inspect import ArgSpec
 from keyword import iskeyword
-import inspect
-import sys
-import re
-from pathlib import Path
 
+import sqlalchemy
 from sqlalchemy import (Enum, ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, UniqueConstraint, Table,
                         Column)
 from sqlalchemy.schema import ForeignKey
-from sqlalchemy.util import OrderedDict
 from sqlalchemy.types import Boolean, String
-import sqlalchemy
+from sqlalchemy.util import OrderedDict
 
 try:
     from sqlalchemy.sql.expression import text, TextClause

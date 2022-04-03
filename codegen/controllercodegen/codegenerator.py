@@ -19,7 +19,7 @@ import shutil
 
 from .template.codeblocktemplate import CodeBlockTemplate
 from .template.filetemplate import FileTemplate
-from utils.loggings import loggings
+from codegen.utils.loggings import loggings
 
 
 class CodeGenerator(object):

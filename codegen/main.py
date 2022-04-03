@@ -9,17 +9,20 @@ import sys
 from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
-import sqlacodegen
-import sqlacodegen.dialects
+import modelcodegen
+import modelcodegen.dialects
 from controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
-from sqlacodegen.codegen import CodeGenerator as SQLCodeGenerator
+from modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
+from utils import common
 from utils.tablesMetadata import TableMetadata
+
+workPath = common.cur_file_dir()
 
 
 def import_dialect_specificities(engine):
     dialect_name = '.' + engine.dialect.name
     try:
-        importlib.import_module(dialect_name, 'sqlacodegen.dialects')
+        importlib.import_module(dialect_name, 'modelcodegen.dialects')
     except ImportError:
         pass
 
@@ -51,7 +54,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print(sqlacodegen.version)
+        print(modelcodegen.version)
         return
     if not args.url:
         print('You must supply a url\n', file=sys.stderr)
@@ -75,14 +78,14 @@ def main():
 
     if args.controller_layer:
         os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
-        reflection_views = [model.table.name for model in generator.models if type(model) == sqlacodegen.codegen.ModelTable]
+        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
         table_dict = TableMetadata.get_tables_metadata(
             metadata=metadata,
             reflection_views=reflection_views,
         )
         generator = ControllerCodeGenerator(table_dict)
         generator.controller_codegen(controller_dir=controller_dir)
-        generator.static_generate(outdir, os.path.join(os.curdir, "staticTemplate"))
+        generator.static_generate(outdir, os.path.join(workPath, "staticTemplate"))
 
 
 if __name__ == '__main__':

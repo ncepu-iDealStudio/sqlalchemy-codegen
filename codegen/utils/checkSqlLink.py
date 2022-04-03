@@ -12,7 +12,7 @@
 
 from sqlalchemy import create_engine, MetaData, inspect
 
-from utils.checkTable import CheckTable
+from codegen.utils.checkTable import CheckTable
 from urllib import parse
 
 
