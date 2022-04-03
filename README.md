@@ -1,4 +1,4 @@
-# Flask-RESTfulCodegen
+# flask-sqlalchemy-codegen
 
 Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
@@ -18,13 +18,13 @@ What's different:
 
 With pip:
 ```sh
-pip install Flask-RESTfulCodegen
+pip install flask-sqlalchemy-codegen
 ```
 
 Without pip:
 ```sh
-git clone https://gitee.com/ncepu-bj/flask-restful-codegen.git
-cd flask-restful-codegen/
+git clone https://gitee.com/ncepu-bj/flask-sqlalchemy-codegen.git
+cd flask-sqlalchemy-codegen/
 python setup.py install
 ```
 
