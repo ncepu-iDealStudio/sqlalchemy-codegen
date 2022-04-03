@@ -30,8 +30,8 @@ python setup.py install
 
 For contributing:
 ```sh
-git clone https://gitee.com/ncepu-bj/flask-restful-codegen.git
+git clone https://gitee.com/ncepu-bj/flask-sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
-python -m sqlacodegen.main --flask --outfile models.py mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> [--tables <tablenames>] [--notables]
+python -m sqlacodegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
 ```

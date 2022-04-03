@@ -50,6 +50,7 @@ setup(
     keywords=['sqlalchemy', 'sqlacodegen', 'flask','flask-restful'],
     license='MIT',
     packages=find_packages(exclude=['tests']),
+    package_data={'': ['*.json', '*.conf']},
     install_requires=(
         'SQLAlchemy >= 0.6.0',
         'inflect >= 0.2.0',
@@ -63,7 +64,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'flask-sqlacodegen=codegen.main:main'
+            'flask-sqlalchemy-codegen=codegen.main:main'
         ]
     }
 )

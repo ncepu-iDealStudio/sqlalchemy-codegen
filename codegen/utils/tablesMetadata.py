@@ -12,7 +12,7 @@
 import json
 import os.path
 
-from ..utils.common import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
+from .common import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
 
 
 class TableMetadata(object):
@@ -26,8 +26,9 @@ class TableMetadata(object):
             :param reflection_views: 需要反射的视图名称列表
         """
 
-        from main import workPath
-        with open(os.path.join(workPath, 'config/datatype_map.json'), 'r', encoding='utf-8') as f:
+        from ..main import workPath
+        conf_path = os.path.join(os.path.dirname(workPath), 'Lib/site-packages/codegen/config')
+        with open(os.path.join(conf_path, 'datatype_map.json'), 'r', encoding='utf-8') as f:
             cls.TYPE_MAPPING = json.load(f)
         # Get all tables object
         table_objs = metadata.tables.values()

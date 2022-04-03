@@ -3,4 +3,4 @@
 # @Date : 2022/4/3 17:02
 # @Software: PyCharm
 
-version = '1.0.0'
+version = '1.0.2'

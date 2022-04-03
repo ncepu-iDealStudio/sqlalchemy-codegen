@@ -10,7 +10,6 @@
     General method
 """
 
-
 # 连字符转驼峰
 import os
 import sys
@@ -67,6 +66,7 @@ def cur_file_dir():
         return path
     elif os.path.isfile(path):
         return os.path.dirname(path)
+
 
 if __name__ == '__main__':
     ll = ['user_info', 'userInfo', 'userinfo']

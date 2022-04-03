@@ -11,9 +11,9 @@
 """
 
 from sqlalchemy import create_engine, MetaData, inspect
-
-from codegen.utils.checkTable import CheckTable
 from urllib import parse
+
+from .checkTable import CheckTable
 
 
 def check_sql_link(dialect, username, password, host, port, database) -> dict:
@@ -86,11 +86,13 @@ def check_sql_link(dialect, username, password, host, port, database) -> dict:
                     })
             data['table'].append({
                 'table': str(table['table_name']),
-                'businesskeyname': table['business_key_column'].get('column') if table['business_key_column'].get('column') else '',
+                'businesskeyname': table['business_key_column'].get('column') if table['business_key_column'].get(
+                    'column') else '',
                 'businesskeyrule': '',
                 'logicaldeletemark': '',
                 'field': filed,
-                'businesskeyuneditable': True if table['business_key_column'].get('column') or len(table['primary_key_columns']) > 1 else False,
+                'businesskeyuneditable': True if table['business_key_column'].get('column') or len(
+                    table['primary_key_columns']) > 1 else False,
                 "businesskeytype": business_key_type,
                 'issave': False
             })
