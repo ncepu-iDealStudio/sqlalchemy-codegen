@@ -12,10 +12,10 @@ from sqlalchemy.schema import MetaData
 from . import modelcodegen
 from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
 from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
-from .utils import common
+from .utils import commons
 from .utils.tablesMetadata import TableMetadata
 
-workPath = common.cur_file_dir()
+workPath = commons.cur_file_dir()
 
 
 def import_dialect_specificities(engine):

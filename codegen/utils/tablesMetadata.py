@@ -12,7 +12,7 @@
 import json
 import os.path
 
-from .common import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
+from .commons import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
 
 
 class TableMetadata(object):
