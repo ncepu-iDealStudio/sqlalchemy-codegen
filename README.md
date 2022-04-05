@@ -33,5 +33,11 @@ For contributing:
 git clone https://gitee.com/ncepu-bj/flask-sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
-python -m sqlacodegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
+python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
+
 ```
+
+How To use:
+'''
+flask-sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
+'''

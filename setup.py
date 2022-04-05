@@ -24,7 +24,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name='flask-sqlalchemy-codegen',
-    description='Automatic model code and resource generator for SQLAlchemy with Flask support',
+    description='Automatic generate model layer and controller layer code for SQLAlchemy with Flask support',
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     version=codegen.version,
@@ -47,7 +47,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
-    keywords=['sqlalchemy', 'sqlacodegen', 'flask','flask-restful'],
+    keywords=['sqlalchemy','flask-sqlalchemy', 'sqlacodegen', 'flask'],
     license='MIT',
     packages=find_packages(exclude=['tests']),
     package_data={'': ['*.json', '*.conf']},

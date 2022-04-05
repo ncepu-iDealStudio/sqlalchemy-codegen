@@ -10,7 +10,6 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
 from . import modelcodegen
-from .modelcodegen import dialects
 from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
 from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
 from .utils import common
@@ -44,8 +43,6 @@ def main():
     parser.add_argument('--models_layer', action='store_true', help='model file to write output to direction models')
     parser.add_argument('--controller_layer', action='store_true',
                         help='controller file to write output to direction controllers')
-    parser.add_argument('--resource_layer', action='store_true',
-                        help='resource file to write output to direction resources')
     parser.add_argument('--nobackrefs', action='store_true', help="don't include backrefs")
     parser.add_argument('--flask', action='store_true', help="use Flask-SQLAlchemy columns")
     parser.add_argument('--ignore-cols',
