@@ -1,9 +1,9 @@
-# flask-sqlalchemy-codegen
+# sqlalchemy-codegen
 
 Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
 What's different:
-* Support for generate Resource layer,include RESTful API based Flask-RESTful.
+* Support for generate controller layer.
 * Support for generate Model layer.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
 * Defaults to generating backrefs in relationships. `--nobackref` still included as option in case backrefs are not wanted. 
