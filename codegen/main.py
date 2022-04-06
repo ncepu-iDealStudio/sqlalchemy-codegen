@@ -15,8 +15,6 @@ from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
 from .utils import commons
 from .utils.tablesMetadata import TableMetadata
 
-workPath = commons.cur_file_dir()
-
 
 def import_dialect_specificities(engine):
     dialect_name = '.' + engine.dialect.name
@@ -25,6 +23,8 @@ def import_dialect_specificities(engine):
     except ImportError:
         pass
 
+workPath = commons.cur_file_dir()
+workPath = os.path.join(workPath, "../Lib/site-packages/codegen")
 
 def main():
     parser = argparse.ArgumentParser(description='Generates SQLAlchemy model code from an existing database.')
@@ -57,7 +57,6 @@ def main():
         print('You must supply a url\n', file=sys.stderr)
         parser.print_help()
         return
-
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
     metadata = MetaData(engine)
@@ -82,7 +81,10 @@ def main():
         )
         generator = ControllerCodeGenerator(table_dict)
         generator.controller_codegen(controller_dir=controller_dir)
-        generator.static_generate(outdir, os.path.join(workPath, "staticTemplate"))
+        util_path = os.path.join(outdir, "utils")
+        if not os.path.exists(util_path):
+            os.mkdir(util_path)
+        generator.static_generate(util_path, os.path.join(workPath, "staticTemplate/utils"))
 
 
 if __name__ == '__main__':

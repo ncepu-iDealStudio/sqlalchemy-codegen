@@ -27,7 +27,7 @@ class TableMetadata(object):
         """
 
         from ..main import workPath
-        conf_path = os.path.join(os.path.dirname(workPath), 'Lib/site-packages/codegen/config')
+        conf_path = os.path.join(os.path.abspath(workPath), 'config')
         with open(os.path.join(conf_path, 'datatype_map.json'), 'r', encoding='utf-8') as f:
             cls.TYPE_MAPPING = json.load(f)
         # Get all tables object

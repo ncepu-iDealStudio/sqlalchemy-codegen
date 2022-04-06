@@ -20,7 +20,7 @@ import json
 
 from sqlalchemy import or_
 
-from . import db
+from ..models import db
 from ..models.{model_name} import {parent_model}
 from ..utils import commons
 from ..utils.response_code import RET, error_map_EN

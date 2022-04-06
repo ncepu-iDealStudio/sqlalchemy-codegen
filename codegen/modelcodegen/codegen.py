@@ -661,6 +661,16 @@ class CodeGenerator(object):
             os.mkdir(outdir)
 
         # Render the model tables and classes
+        with open(os.path.join(outdir, f"__init__.py"), "w", encoding="utf-8") as outfile:
+            s = """\
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+            """
+            outfile.write(s)
+
         for model in self.models:
             outfilename = os.path.join(outdir, f"{model.table.name}.py")
             with open(outfilename, "w", encoding="utf-8") as outfile:
@@ -670,7 +680,7 @@ class CodeGenerator(object):
                 print(self.collector.render() + '\n\n', file=outfile)
 
                 if self.flask:
-                    print('db = SQLAlchemy()', file=outfile)
+                    print('from . import db', file=outfile)
                 else:
                     if any(isinstance(model, ModelClass) for model in self.models):
                         print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
