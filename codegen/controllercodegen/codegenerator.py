@@ -225,7 +225,6 @@ class CodeGenerator(object):
             # 拷贝
             if os.path.exists(source_dir):
                 for root, dirs, files in os.walk(source_dir):
-                    print(f"root:{os.path.basename(root)} dirs:{dirs} files:{files}")
                     if os.path.basename(root) == "__pycache__":
                         continue
                     for file in files:
