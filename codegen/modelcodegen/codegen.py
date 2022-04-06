@@ -675,13 +675,12 @@ db = SQLAlchemy()
             outfilename = os.path.join(outdir, f"{model.table.name}.py")
             with open(outfilename, "w", encoding="utf-8") as outfile:
                 print(self.header, file=outfile)
-
-                # Render the collected imports
-                print(self.collector.render() + '\n\n', file=outfile)
-
                 if self.flask:
                     print('from . import db', file=outfile)
                 else:
+                    # Render the collected imports
+                    print(self.collector.render() + '\n\n', file=outfile)
+
                     if any(isinstance(model, ModelClass) for model in self.models):
                         print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
                     else:

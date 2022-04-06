@@ -4,7 +4,7 @@ Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kami
 
 What's different:
 * Support for generate controller layer.
-* Support for generate Model layer.
+* Support for generate Model layer include many model py files.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
 * Defaults to generating backrefs in relationships. `--nobackref` still included as option in case backrefs are not wanted. 
 * Naming of backrefs is class name in snake_case (as opposed to CamelCase) and is pluralized if it's Many-to-One or Many-to-Many using [inflect](https://pypi.python.org/pypi/inflect).
@@ -40,4 +40,9 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 How To use:
 '''
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
+'''
+
+example:
+'''
+sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
 '''

@@ -16,15 +16,12 @@ class CodeBlockTemplate(object):
     imports = """
 import datetime
 import math
-import json
 
-from sqlalchemy import or_
-
-from ..models import db
-from ..models.{model_name} import {parent_model}
-from ..utils import commons
-from ..utils.response_code import RET, error_map_EN
-from ..utils.loggings import loggings"""
+from models import db
+from models.{model_name} import {parent_model}
+from utils import commons
+from utils.response_code import RET, error_map_EN
+from utils.loggings import loggings"""
 
     add_column_init = """{column}=kwargs.get('{column}'),
                 """
