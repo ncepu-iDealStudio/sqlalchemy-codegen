@@ -18,19 +18,19 @@ What's different:
 
 With pip:
 ```sh
-pip install flask-sqlalchemy-codegen
+pip install sqlalchemy-codegen
 ```
 
 Without pip:
 ```sh
-git clone https://gitee.com/ncepu-bj/flask-sqlalchemy-codegen.git
-cd flask-sqlalchemy-codegen/
+git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
+cd sqlalchemy-codegen/
 python setup.py install
 ```
 
 For contributing:
 ```sh
-git clone https://gitee.com/ncepu-bj/flask-sqlalchemy-codegen
+git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
 python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
@@ -39,5 +39,5 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 
 How To use:
 '''
-flask-sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
+sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
 '''

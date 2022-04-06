@@ -23,7 +23,7 @@ if sys.version_info < (2, 7):
     extra_requirements = ('argparse',)
 
 setup(
-    name='flask-sqlalchemy-codegen',
+    name='sqlalchemy-codegen',
     description='Automatic generate model layer and controller layer code for SQLAlchemy with Flask support',
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -64,7 +64,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'flask-sqlalchemy-codegen=codegen.main:main'
+            'sqlalchemy-codegen=codegen.main:main'
         ]
     }
 )
