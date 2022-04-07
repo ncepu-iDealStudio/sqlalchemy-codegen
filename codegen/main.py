@@ -79,7 +79,7 @@ def main():
             metadata=metadata,
             reflection_views=reflection_views,
         )
-        generator = ControllerCodeGenerator(table_dict)
+        generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
         generator.controller_codegen(controller_dir=controller_dir)
         util_path = os.path.join(outdir, "utils")
         if not os.path.exists(util_path):

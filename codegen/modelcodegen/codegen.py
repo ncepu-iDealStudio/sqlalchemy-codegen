@@ -662,13 +662,18 @@ class CodeGenerator(object):
 
         # Render the model tables and classes
         with open(os.path.join(outdir, f"__init__.py"), "w", encoding="utf-8") as outfile:
-            s = """\
+            if self.flask:
+                s = """\
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
             """
+            else:
+                s = """\
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-"""
             outfile.write(s)
 
         for model in self.models:

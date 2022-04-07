@@ -13,15 +13,25 @@
 
 class CodeBlockTemplate(object):
 
+    flask_imports = """
+import datetime
+import math
+
+from ..models import db
+from ..models.{model_name} import {parent_model}
+from utils import commons
+from utils.response_code import RET, error_map_EN
+from utils.loggings import loggings"""
+
     imports = """
 import datetime
 import math
 
-from models import db
-from models.{model_name} import {parent_model}
-from utils import commons
-from utils.response_code import RET, error_map_EN
-from utils.loggings import loggings"""
+from . import Session
+from ..models.{model_name} import {parent_model}
+from ..utils import commons
+from ..utils.response_code import RET, error_map_EN
+from ..utils.loggings import loggings"""
 
     add_column_init = """{column}=kwargs.get('{column}'),
                 """

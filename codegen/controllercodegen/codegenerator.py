@@ -24,9 +24,11 @@ from ..utils.loggings import loggings
 
 class CodeGenerator(object):
 
-    def __init__(self, table_dict):
+    def __init__(self, table_dict, flask, databaseUrl):
         super().__init__()
         self.table_dict = table_dict
+        self.flask = flask
+        self.databaseUrl = databaseUrl
 
     def controller_codegen(self, controller_dir):
 
@@ -45,15 +47,26 @@ class CodeGenerator(object):
                 primary_key = table['primary_key_columns']
 
                 # combine imports
-                imports = CodeBlockTemplate.imports.format(
-                    model_name=table['table_name'],
-                    parent_model=parent_model
-                )
-                basic = FileTemplate.basic_template.format(
-                    imports=imports,
-                    class_name=class_name,
-                    parent_model=parent_model
-                )
+                if self.flask:
+                    imports = CodeBlockTemplate.flask_imports.format(
+                        model_name=table['table_name'],
+                        parent_model=parent_model
+                    )
+                    basic = FileTemplate.basic_template.format(
+                        imports=imports,
+                        class_name=class_name,
+                        parent_model=parent_model
+                    )
+                else:
+                    imports = CodeBlockTemplate.imports.format(
+                        model_name=table['table_name'],
+                        parent_model=parent_model
+                    )
+                    basic = FileTemplate.basic_template.format(
+                        imports=imports,
+                        class_name=class_name,
+                        parent_model=parent_model
+                    )
 
                 # 添加模块
                 column_init = ''
@@ -68,12 +81,18 @@ class CodeGenerator(object):
                     add_result_primary_key += CodeBlockTemplate.add_result_primary_key.format(
                         primary_key=each_primary_key
                     )
-
-                add = FileTemplate.add_template.format(
-                    parent_model=parent_model,
-                    column_init=column_init,
-                    add_result_primary_key=add_result_primary_key
-                )
+                if self.flask:
+                    add = FileTemplate.flask_add_template.format(
+                        parent_model=parent_model,
+                        column_init=column_init,
+                        add_result_primary_key=add_result_primary_key
+                    )
+                else:
+                    add = FileTemplate.add_template.format(
+                        parent_model=parent_model,
+                        column_init=column_init,
+                        add_result_primary_key=add_result_primary_key
+                    )
 
                 # 查询模块
                 get_filter_list = ''
@@ -89,10 +108,16 @@ class CodeGenerator(object):
                     get_filter_list += text
 
                 # 属于复合主键
-                get = FileTemplate.get_template.format(
-                    get_filter_list=get_filter_list,
-                    model_lower=table['table_name']
-                )
+                if self.flask:
+                    get = FileTemplate.flask_get_template.format(
+                        get_filter_list=get_filter_list,
+                        model_lower=table['table_name']
+                    )
+                else:
+                    get = FileTemplate.get_template.format(
+                        get_filter_list=get_filter_list,
+                        model_lower=table['table_name']
+                    )
 
                 # 删除模块
                 # 拼接删除方法中的filter和results
@@ -105,11 +130,16 @@ class CodeGenerator(object):
                     results_primary_keys += CodeBlockTemplate.multi_primary_key_result.format(
                         primary_key=each_primary_key
                     )
-
-                delete = FileTemplate.delete_template_physical.format(
-                    filter_list_init=filter_list_init,
-                    results_primary_keys=results_primary_keys,
-                )
+                if self.flask:
+                    delete = FileTemplate.flask_delete_template_physical.format(
+                        filter_list_init=filter_list_init,
+                        results_primary_keys=results_primary_keys,
+                    )
+                else:
+                    delete = FileTemplate.delete_template_physical.format(
+                        filter_list_init=filter_list_init,
+                        results_primary_keys=results_primary_keys,
+                    )
 
                 # 更新模块
 
@@ -123,11 +153,16 @@ class CodeGenerator(object):
                     results_primary_keys += CodeBlockTemplate.multi_primary_key_result.format(
                         primary_key=each_primary_key
                     )
-
-                update = FileTemplate.update_template_physical.format(
-                    filter_list_init=filter_list_init,
-                    results_primary_keys=results_primary_keys
-                )
+                if self.flask:
+                    update = FileTemplate.flask_update_template_physical.format(
+                        filter_list_init=filter_list_init,
+                        results_primary_keys=results_primary_keys
+                    )
+                else:
+                    update = FileTemplate.update_template_physical.format(
+                        filter_list_init=filter_list_init,
+                        results_primary_keys=results_primary_keys
+                    )
 
                 # # 列表添加模块
                 # add_list_column_init = ''
@@ -191,7 +226,10 @@ class CodeGenerator(object):
             loggings.info(1, 'Generating __init__...')
             inti_file = os.path.join(controller_dir, '__init__.py')
             with open(inti_file, 'w', encoding='utf-8') as fw:
-                fw.write(FileTemplate.init_template)
+                if self.flask:
+                    fw.write(FileTemplate.init_flask_template)
+                else:
+                    fw.write(FileTemplate.init_template.format(databaseUrl=self.databaseUrl))
 
             loggings.info(1, '__init__ generated successfully')
             for file_name, code in codes.items():
