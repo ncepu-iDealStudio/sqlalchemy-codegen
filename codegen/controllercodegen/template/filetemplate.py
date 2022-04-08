@@ -25,6 +25,13 @@ class FileTemplate(object):
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+
+def init_db(url):
+    global engine, Session
+    engine = create_engine(url)
+    Session = sessionmaker(bind=engine)
+
+
 engine = create_engine("{databaseUrl}")
 Session = sessionmaker(bind=engine)
 """
