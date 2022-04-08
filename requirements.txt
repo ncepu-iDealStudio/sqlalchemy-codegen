@@ -1,5 +1,5 @@
 sqlacodegen==2.3.0
-SQLAlchemy==1.4.34
+SQLAlchemy==1.4.35
 pymysql==1.0.2
 loguru==0.6.0
 inflect==5.4.0

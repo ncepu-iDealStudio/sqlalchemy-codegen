@@ -46,18 +46,16 @@ def query_to_dict(models):
     if models is None:
         return []
     if isinstance(models, list):
-        if not models:
-            return []
-        if isinstance(models[0], Model):
+        if isinstance(models[0], dict):
+            res = result_to_dict(models)
+            return res
+        else:
             lst = []
             for model in models:
                 gen = model_to_dict(model)
                 dit = dict((g[0], g[1]) for g in gen)
                 lst.append(dit)
             return lst
-        else:
-            res = result_to_dict(models)
-            return res
     else:
         if isinstance(models, Model):
             gen = model_to_dict(models)
@@ -68,17 +66,8 @@ def query_to_dict(models):
             find_datetime(res)
             return res
 
-
-# 当结果为result对象列表时，result有key()方法
-def result_to_dict(results):
-    res = [dict(zip(r.keys(), r)) for r in results]
-    # 这里r为一个字典，对象传递直接改变字典属性
-    for r in res:
-        find_datetime(r)
-    return res
-
-
-def model_to_dict(model):  # 这段来自于参考资源
+# 单个model对象转字典
+def model_to_dict(model):
     for col in model.__table__.columns:
         if isinstance(col.type, DateTime):
             value = convert_datetime(getattr(model, col.name))
@@ -88,6 +77,13 @@ def model_to_dict(model):  # 这段来自于参考资源
             value = getattr(model, col.name)
         yield (col.name, value)
 
+# 当结果为result对象列表时，result有key()方法
+def result_to_dict(results):
+    res = [dict(zip(r.keys(), r)) for r in results]
+    # 这里r为一个字典，对象传递直接改变字典属性
+    for r in res:
+        find_datetime(r)
+    return res
 
 def find_datetime(value):
     for v in value:
@@ -172,3 +168,12 @@ def tree(data, root, root_field, node_field):
                 children.append(j)
         i['Children'] = children
     return l
+
+def sqlalchemy_model_to_dict(models):
+    lst = []
+    for model in models:
+        dictret = dict(model.__dict__)
+        dictret.pop('_sa_instance_state', None)
+
+        lst.append(dictret)
+    return lst
