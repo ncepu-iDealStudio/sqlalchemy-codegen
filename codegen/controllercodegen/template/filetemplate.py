@@ -103,6 +103,9 @@ class {class_name}({parent_model}):
             filter_list = []
             {filter_list_init}
             res = db.session.query(cls).filter(*filter_list).with_for_update()
+            
+            if not res.first():
+                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
 
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -130,6 +133,9 @@ class {class_name}({parent_model}):
             {filter_list_init}
             res = db.session.query(cls).filter(*filter_list).with_for_update()
 
+            if not res.first():
+                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                
             results = {{
                 'update_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
@@ -210,6 +216,9 @@ class {class_name}({parent_model}):
             {filter_list_init}
             res = session.query(cls).filter(*filter_list).with_for_update()
 
+            if not res.first():
+                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
@@ -237,6 +246,9 @@ class {class_name}({parent_model}):
             {filter_list_init}
             res = session.query(cls).filter(*filter_list).with_for_update()
 
+            if not res.first():
+                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                
             results = {{
                 'update_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
