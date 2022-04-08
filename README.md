@@ -2,7 +2,7 @@
 
 Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
-What's different:
+What's new and different:
 * Support for generate controller layer.
 * Support for generate Model layer include many model py files.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
@@ -38,11 +38,17 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 ```
 
 How To use:
-'''
+```sh
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
+
 '''
 
 example:
-'''
+```sh
 sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
+
+or
+
+sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --models_layer --controller_layer --outdir dist
+
 '''
