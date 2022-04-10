@@ -666,6 +666,7 @@ class CodeGenerator(object):
                 s = """\
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 from sqlalchemy import inspect
 from sqlalchemy.engine import Row
 from flask_sqlalchemy import SQLAlchemy
@@ -696,6 +697,7 @@ class BaseModel(db.Model):
                 s = """\
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 from sqlalchemy import inspect
 from sqlalchemy.engine import Row
 from sqlalchemy.ext.declarative import declarative_base

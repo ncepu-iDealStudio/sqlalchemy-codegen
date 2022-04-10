@@ -22,27 +22,21 @@ class FileTemplate(object):
     init_template = """\
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-
-def init_db(url):
-    global engine, Session
-    engine = create_engine(url)
-    Session = sessionmaker(bind=engine)
-
-
-engine = create_engine("{databaseUrl}")
+SQLALCHEMY_DATABASE_URI = "{databaseUrl}"
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
+session = Session()
 
-
-def get_session():
-    return Session()
 """
 
     basic_template = """\
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 {imports}
 
 
@@ -159,8 +153,7 @@ class {class_name}({parent_model}):
     add_template = """
     # add
     @classmethod
-    def add(cls, **kwargs):
-        session = get_session()
+    def add(cls, **kwargs):        
         try:
             model = {parent_model}(
                 {column_init}
@@ -184,8 +177,7 @@ class {class_name}({parent_model}):
     get_template = """
     # get
     @classmethod
-    def get(cls, **kwargs):
-        session = get_session()
+    def get(cls, **kwargs):        
         try:
             filter_list = []
             {get_filter_list}
@@ -210,8 +202,7 @@ class {class_name}({parent_model}):
     delete_template_physical = """
     # delete
     @classmethod
-    def delete(cls, **kwargs):
-        session = get_session()
+    def delete(cls, **kwargs):        
         try:
             filter_list = []
             {filter_list_init}
@@ -240,8 +231,7 @@ class {class_name}({parent_model}):
     update_template_physical = """
     # update
     @classmethod
-    def update(cls, **kwargs):
-        session = get_session()
+    def update(cls, **kwargs):        
         try:
             filter_list = []
             {filter_list_init}
