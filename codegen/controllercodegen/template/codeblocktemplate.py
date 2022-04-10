@@ -25,7 +25,7 @@ from ..models.{model_name} import {parent_model}
 import datetime
 import math
 
-from . import Session
+from . import get_session
 from ..models.{model_name} import {parent_model}
 """
 

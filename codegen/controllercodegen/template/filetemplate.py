@@ -34,6 +34,10 @@ def init_db(url):
 
 engine = create_engine("{databaseUrl}")
 Session = sessionmaker(bind=engine)
+
+
+def get_session():
+    return Session()
 """
 
     basic_template = """\
@@ -156,7 +160,7 @@ class {class_name}({parent_model}):
     # add
     @classmethod
     def add(cls, **kwargs):
-        session = Session()
+        session = get_session()
         try:
             model = {parent_model}(
                 {column_init}
@@ -181,7 +185,7 @@ class {class_name}({parent_model}):
     # get
     @classmethod
     def get(cls, **kwargs):
-        session = Session()
+        session = get_session()
         try:
             filter_list = []
             {get_filter_list}
@@ -207,7 +211,7 @@ class {class_name}({parent_model}):
     # delete
     @classmethod
     def delete(cls, **kwargs):
-        session = Session()
+        session = get_session()
         try:
             filter_list = []
             {filter_list_init}
@@ -237,7 +241,7 @@ class {class_name}({parent_model}):
     # update
     @classmethod
     def update(cls, **kwargs):
-        session = Session()
+        session = get_session()
         try:
             filter_list = []
             {filter_list_init}
