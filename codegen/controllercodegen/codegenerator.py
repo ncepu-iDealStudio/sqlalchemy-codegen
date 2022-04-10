@@ -19,7 +19,6 @@ import shutil
 
 from .template.codeblocktemplate import CodeBlockTemplate
 from .template.filetemplate import FileTemplate
-from ..utils.loggings import loggings
 
 
 class CodeGenerator(object):
@@ -223,7 +222,7 @@ class CodeGenerator(object):
                 codes[file_name] = basic + add + get + delete + update
 
             # generate files
-            loggings.info(1, 'Generating __init__...')
+            print("Info: ", 'Generating __init__...')
             inti_file = os.path.join(controller_dir, '__init__.py')
             with open(inti_file, 'w', encoding='utf-8') as fw:
                 if self.flask:
@@ -231,16 +230,16 @@ class CodeGenerator(object):
                 else:
                     fw.write(FileTemplate.init_template.format(databaseUrl=self.databaseUrl))
 
-            loggings.info(1, '__init__ generated successfully')
+            print("Info: ", '__init__ generated successfully')
             for file_name, code in codes.items():
-                loggings.info(1, 'Generating {}...'.format(file_name))
+                print("Info: ", 'Generating {}...'.format(file_name))
                 m_file = os.path.join(controller_dir, file_name + '.py')
                 with open(m_file, 'w', encoding='utf-8') as fw:
                     fw.write(code)
-                loggings.info(1, '{} generated successfully'.format(file_name))
+                print("Info: ", '{} generated successfully'.format(file_name))
 
         except Exception as e:
-            loggings.exception(1, e)
+            print("Error: ", e)
 
     @classmethod
     def static_generate(cls, target_dir, source_dir):
@@ -274,7 +273,7 @@ class CodeGenerator(object):
                             os.makedirs(target_file)
                         # 拷贝
                         shutil.copy(src_file, target_file)
-                        loggings.info(1, "The file '{}' has been copied to '{}'".format(src_file, target_file))
+                        print("Info: ", "The file '{}' has been copied to '{}'".format(src_file, target_file))
 
         except Exception as e:
-            loggings.exception(1, e)
+            print("Error: ", e)
