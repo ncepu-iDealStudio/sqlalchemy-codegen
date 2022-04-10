@@ -700,6 +700,9 @@ from sqlalchemy import inspect
 from sqlalchemy.engine import Row
 from sqlalchemy.ext.declarative import declarative_base
 
+DeclarativeBase = declarative_base()
+
+
 class Base(DeclarativeBase):
     __abstract__ = True
 
