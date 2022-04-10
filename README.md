@@ -34,14 +34,12 @@ git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
 python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
-
 ```
 
 How To use:
 ```sh
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
-
-'''
+```
 
 example:
 ```sh
@@ -50,5 +48,4 @@ sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --m
 or
 
 sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --models_layer --controller_layer --outdir dist
-
-'''
+```
