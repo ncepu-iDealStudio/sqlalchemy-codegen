@@ -81,10 +81,6 @@ def main():
         )
         generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
         generator.controller_codegen(controller_dir=controller_dir)
-        util_path = os.path.join(outdir, "utils")
-        if not os.path.exists(util_path):
-            os.mkdir(util_path)
-        generator.static_generate(util_path, os.path.join(workPath, "staticTemplate/utils"))
 
 
 if __name__ == '__main__':

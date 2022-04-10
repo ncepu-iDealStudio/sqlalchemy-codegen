@@ -59,12 +59,11 @@ class {class_name}({parent_model}):
                 'add_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {add_result_primary_key}
             }}
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
             
         except Exception as e:
             db.session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             db.session.close()
 """
@@ -86,11 +85,10 @@ class {class_name}({parent_model}):
             {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
 
             results = cls.to_dict({model_lower}_info)
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'totalCount': count, 'totalPage': pages, 'data': results}}
             
         except Exception as e:
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             db.session.close()
 """
@@ -105,7 +103,7 @@ class {class_name}({parent_model}):
             res = db.session.query(cls).filter(*filter_list).with_for_update()
             
             if not res.first():
-                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
 
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -114,12 +112,12 @@ class {class_name}({parent_model}):
             res.delete()
             db.session.commit()
 
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
 
         except Exception as e:
             db.session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             db.session.close()
 """
@@ -134,7 +132,7 @@ class {class_name}({parent_model}):
             res = db.session.query(cls).filter(*filter_list).with_for_update()
 
             if not res.first():
-                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
                 'update_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -144,12 +142,12 @@ class {class_name}({parent_model}):
             res.update(kwargs)
             db.session.commit()
             
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
 
         except Exception as e:
             db.session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             db.session.close()
 """
@@ -169,12 +167,12 @@ class {class_name}({parent_model}):
                 'add_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {add_result_primary_key}
             }}
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
 
         except Exception as e:
             session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             session.close()
 """
@@ -197,11 +195,10 @@ class {class_name}({parent_model}):
             {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
 
             results = cls.to_dict({model_lower}_info)
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'totalCount': count, 'totalPage': pages, 'data': results}}
 
         except Exception as e:
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             session.close()
 """
@@ -217,7 +214,7 @@ class {class_name}({parent_model}):
             res = session.query(cls).filter(*filter_list).with_for_update()
 
             if not res.first():
-                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -226,12 +223,12 @@ class {class_name}({parent_model}):
             res.delete()
             session.commit()
 
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
 
         except Exception as e:
             session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             session.close()
 """
@@ -247,7 +244,7 @@ class {class_name}({parent_model}):
             res = session.query(cls).filter(*filter_list).with_for_update()
 
             if not res.first():
-                return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'error': "数据不存在"}}
+                return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
                 'update_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -257,12 +254,11 @@ class {class_name}({parent_model}):
             res.update(kwargs)
             session.commit()
 
-            return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}}
+            return {{'code': "200", 'message': "成功！", 'data': results}}
 
         except Exception as e:
             session.rollback()
-            loggings.exception(1, e)
-            return {{'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {{'error': str(e)}}}}
+            return {{'code': "5001", 'message': "数据库错误", 'data': {{'error': str(e)}}}}
         finally:
             session.close()
 """
