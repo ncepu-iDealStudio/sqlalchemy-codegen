@@ -84,8 +84,8 @@ class {class_name}({parent_model}):
             count = {model_lower}_info.count()
             pages = math.ceil(count / size)
             {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
-   
-            results = commons.sqlalchemy_model_to_dict({model_lower}_info)
+
+            results = cls.to_dict({model_lower}_info)
             return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}}
             
         except Exception as e:
@@ -196,7 +196,7 @@ class {class_name}({parent_model}):
             pages = math.ceil(count / size)
             {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
 
-            results = commons.sqlalchemy_model_to_dict({model_lower}_info)
+            results = cls.to_dict({model_lower}_info)
             return {{'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}}
 
         except Exception as e:
