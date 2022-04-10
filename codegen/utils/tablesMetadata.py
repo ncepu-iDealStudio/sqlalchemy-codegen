@@ -9,14 +9,28 @@
 """
     Get metadata of all tables
 """
-import json
-import os.path
-
 from .commons import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
 
 
 class TableMetadata(object):
-    TYPE_MAPPING = ""
+    TYPE_MAPPING = [
+        {
+            "database": "mysql",
+            "data_map": {
+                "int": ["int", "bigint", "smallint", "mediumint", "integer", "tinyint"],
+                "float": ["float", "double", "real", "numeric", "decimal"]
+            }
+        },
+        {
+            "database": "postgresql",
+            "data_map": {
+                "int": ["int", "bigint", "smallint", "mediumint"],
+                "float": ["float", "double", "decimal"],
+                "decimal": ["decimal"],
+                "str": ["char", "varchar", "tinytext", "text", "mediumtext", "longtext"]
+            }
+        }
+    ]
 
     @classmethod
     def get_tables_metadata(cls, metadata, reflection_views) -> dict:
@@ -26,10 +40,6 @@ class TableMetadata(object):
             :param reflection_views: 需要反射的视图名称列表
         """
 
-        from ..main import workPath
-        conf_path = os.path.join(os.path.abspath(workPath), 'config')
-        with open(os.path.join(conf_path, 'datatype_map.json'), 'r', encoding='utf-8') as f:
-            cls.TYPE_MAPPING = json.load(f)
         # Get all tables object
         table_objs = metadata.tables.values()
         table_dict = {}

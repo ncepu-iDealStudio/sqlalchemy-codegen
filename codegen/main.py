@@ -12,7 +12,6 @@ from sqlalchemy.schema import MetaData
 from . import modelcodegen
 from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
 from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
-from .utils import commons
 from .utils.tablesMetadata import TableMetadata
 
 
@@ -23,8 +22,6 @@ def import_dialect_specificities(engine):
     except ImportError:
         pass
 
-workPath = commons.cur_file_dir()
-workPath = os.path.join(workPath, "../Lib/site-packages/codegen")
 
 def main():
     parser = argparse.ArgumentParser(description='Generates SQLAlchemy model code from an existing database.')
