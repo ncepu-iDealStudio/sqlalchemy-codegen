@@ -1,22 +1,24 @@
 """ """
 from __future__ import unicode_literals, division, print_function, absolute_import
+
 import argparse
-import codecs
 import importlib
+import os
 import sys
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
-from sqlacodegen.codegen import CodeGenerator
-import sqlacodegen
-import sqlacodegen.dialects
+from . import modelcodegen
+from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
+from .modelcodegen.codegen import CodeGenerator as SQLCodeGenerator
+from .utils.tablesMetadata import TableMetadata
 
 
 def import_dialect_specificities(engine):
     dialect_name = '.' + engine.dialect.name
     try:
-        importlib.import_module(dialect_name, 'sqlacodegen.dialects')
+        importlib.import_module(dialect_name, 'modelcodegen.dialects')
     except ImportError:
         pass
 
@@ -34,32 +36,48 @@ def main():
     parser.add_argument('--noinflect', action='store_true', help="don't try to convert tables names to singular form")
     parser.add_argument('--noclasses', action='store_true', help="don't generate classes, only tables")
     parser.add_argument('--notables', action='store_true', help="don't generate tables, only classes")
-    parser.add_argument('--outfile', help='file to write output to (default: stdout)')
+    parser.add_argument('--outdir', help='file to write output to (default: stdout)')
+    parser.add_argument('--models_layer', action='store_true', help='model file to write output to direction models')
+    parser.add_argument('--controller_layer', action='store_true',
+                        help='controller file to write output to direction controllers')
     parser.add_argument('--nobackrefs', action='store_true', help="don't include backrefs")
     parser.add_argument('--flask', action='store_true', help="use Flask-SQLAlchemy columns")
-    parser.add_argument('--ignore-cols', help="Don't check foreign key constraints on specified columns (comma-separated)")
+    parser.add_argument('--ignore-cols',
+                        help="Don't check foreign key constraints on specified columns (comma-separated)")
     parser.add_argument('--nocomments', action='store_true', help="don't render column comments")
     args = parser.parse_args()
 
     if args.version:
-        print(sqlacodegen.version)
+        print(modelcodegen.version)
         return
     if not args.url:
         print('You must supply a url\n', file=sys.stderr)
         parser.print_help()
         return
-
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
     metadata = MetaData(engine)
     tables = args.tables.split(',') if args.tables else None
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
     metadata.reflect(engine, args.schema, not args.noviews, tables)
-    outfile = codecs.open(args.outfile, 'w', encoding='utf-8') if args.outfile else sys.stdout
-    generator = CodeGenerator(metadata, args.noindexes, args.noconstraints,
-                              args.nojoined, args.noinflect, args.nobackrefs,
-                              args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
-    generator.render(outfile)
+    outdir = args.outdir if args.outdir else sys.stdout
+    generator = SQLCodeGenerator(metadata, args.noindexes, args.noconstraints,
+                                 args.nojoined, args.noinflect, args.nobackrefs,
+                                 args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+
+    if args.models_layer:
+        os.makedirs(model_dir := os.path.join(outdir, 'models'), exist_ok=True)
+        generator.render(model_dir)
+
+    if args.controller_layer:
+        os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
+        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+        table_dict = TableMetadata.get_tables_metadata(
+            metadata=metadata,
+            reflection_views=reflection_views,
+        )
+        generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
+        generator.controller_codegen(controller_dir=controller_dir)
 
 
 if __name__ == '__main__':

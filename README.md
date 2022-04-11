@@ -1,9 +1,10 @@
-# Flask sqlacodegen
+# sqlalchemy-codegen
 
-Fork of [sqlacodegen](https://pypi.python.org/pypi/sqlacodegen) by Alex Gronholm. Based off of version 1.1.6.
+Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
-What's different:
-
+What's new and different:
+* Support for generate controller layer.
+* Support for generate Model layer include many model py files.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
 * Defaults to generating backrefs in relationships. `--nobackref` still included as option in case backrefs are not wanted. 
 * Naming of backrefs is class name in snake_case (as opposed to CamelCase) and is pluralized if it's Many-to-One or Many-to-Many using [inflect](https://pypi.python.org/pypi/inflect).
@@ -17,20 +18,34 @@ What's different:
 
 With pip:
 ```sh
-pip install flask-sqlacodegen
+pip install sqlalchemy-codegen
 ```
 
 Without pip:
 ```sh
-git clone https://github.com/ksindi/flask-sqlacodegen.git
-cd flask-sqlacodegen/
+git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
+cd sqlalchemy-codegen/
 python setup.py install
 ```
 
 For contributing:
 ```sh
-git clone https://github.com/ksindi/flask-sqlacodegen.git
+git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
-python -m sqlacodegen.main --flask --outfile models.py mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> [--tables <tablenames>] [--notables]
+python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
+```
+
+How To use:
+```sh
+sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
+```
+
+example:
+```sh
+sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
+
+or
+
+sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --models_layer --controller_layer --outdir dist
 ```

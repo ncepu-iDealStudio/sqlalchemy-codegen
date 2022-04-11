@@ -1,18 +1,21 @@
 """Contains the code generation logic and helper functions."""
+
 from __future__ import unicode_literals, division, print_function, absolute_import
+
+import inspect
+import os.path
+import re
+import sys
 from collections import defaultdict
 from inspect import ArgSpec
 from keyword import iskeyword
-import inspect
-import sys
-import re
 
+import sqlalchemy
 from sqlalchemy import (Enum, ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, UniqueConstraint, Table,
                         Column)
 from sqlalchemy.schema import ForeignKey
-from sqlalchemy.util import OrderedDict
 from sqlalchemy.types import Boolean, String
-import sqlalchemy
+from sqlalchemy.util import OrderedDict
 
 try:
     from sqlalchemy.sql.expression import text, TextClause
@@ -644,33 +647,102 @@ class CodeGenerator(object):
         if self.flask:
             # Add Flask-SQLAlchemy support
             self.collector.add_literal_import('flask_sqlalchemy', 'SQLAlchemy')
-            parent_name = 'db.Model'
+            parent_name = 'BaseModel'
 
             for model in classes.values():
                 if model.parent_name == 'Base':
                     model.parent_name = parent_name
-        else:
-            self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
-            self.collector.add_literal_import('sqlalchemy', 'MetaData')
+        # else:
+        #     self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
+        #     self.collector.add_literal_import('sqlalchemy', 'MetaData')
 
-    def render(self, outfile=sys.stdout):
-        print(self.header, file=outfile)
-
-        # Render the collected imports
-        print(self.collector.render() + '\n\n', file=outfile)
-
-        if self.flask:
-            print('db = SQLAlchemy()', file=outfile)
-        else:
-            if any(isinstance(model, ModelClass) for model in self.models):
-                print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
-            else:
-                print('metadata = MetaData()', file=outfile)
+    def render(self, outdir):
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
 
         # Render the model tables and classes
-        for model in self.models:
-            print('\n\n', file=outfile)
-            print(model.render().rstrip('\n'), file=outfile)
+        with open(os.path.join(outdir, f"__init__.py"), "w", encoding="utf-8") as outfile:
+            if self.flask:
+                s = """\
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
 
-        if self.footer:
-            print(self.footer, file=outfile)
+from sqlalchemy import inspect
+from sqlalchemy.engine import Row
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+
+class BaseModel(db.Model):
+    __abstract__ = True
+
+    @classmethod
+    def to_dict(cls, models):
+        # 查询结果为空
+        if len(models) == 0:
+            return []
+        # 查询结果不包含所有字段的情况
+        if isinstance(models[0], Row):
+            return [row._asdict() for row in models]
+        # 查询结果包含所有字段的情况
+        else:
+            return [cls._asdict(model) for model in models]
+
+    def _asdict(self):
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs}
+"""
+            else:
+                s = """\
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+from sqlalchemy import inspect
+from sqlalchemy.engine import Row
+from sqlalchemy.ext.declarative import declarative_base
+
+DeclarativeBase = declarative_base()
+
+
+class Base(DeclarativeBase):
+    __abstract__ = True
+
+    @classmethod
+    def to_dict(cls, models):
+        # 查询结果为空
+        if len(models) == 0:
+            return []
+        # 查询结果不包含所有字段的情况
+        if isinstance(models[0], Row):
+            return [row._asdict() for row in models]
+        # 查询结果包含所有字段的情况
+        else:
+            return [cls._asdict(model) for model in models]
+
+    def _asdict(self):
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs}
+"""
+            outfile.write(s)
+
+        for model in self.models:
+            outfilename = os.path.join(outdir, f"{model.table.name}.py")
+            with open(outfilename, "w", encoding="utf-8") as outfile:
+                print(self.header, file=outfile)
+                if self.flask:
+                    print('from . import db, BaseModel', file=outfile)
+                else:
+                    # Render the collected imports
+                    print(self.collector.render() + '\n\n', file=outfile)
+
+                    if any(isinstance(model, ModelClass) for model in self.models):
+                        print('from . import Base', file=outfile)
+                    else:
+                        print('metadata = MetaData()', file=outfile)
+
+                print('\n', file=outfile)
+                print(model.render().rstrip('\n'), file=outfile)
+
+                if self.footer:
+                    print(self.footer, file=outfile)
