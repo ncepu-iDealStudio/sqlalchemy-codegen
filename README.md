@@ -1,5 +1,11 @@
 # sqlalchemy-codegen
 
+github:https://github.com/ncepu-iDealStudio/sqlalchemy-codegen
+
+gitee:https://gitee.com/ncepu-bj/sqlalchemy-codegen
+
+document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-faeba859bfcf
+
 Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
 
 What's new and different:

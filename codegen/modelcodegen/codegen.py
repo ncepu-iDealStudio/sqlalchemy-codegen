@@ -317,7 +317,7 @@ class ModelClass(Model):
 
     def __init__(self, table, association_tables, inflect_engine, detect_joined):
         super(ModelClass, self).__init__(table)
-        self.name = self._tablename_to_classname(table.name, inflect_engine)
+        self.name = self._tablename_to_classname(table.name)
         self.children = []
         self.attributes = OrderedDict()
 
@@ -329,7 +329,7 @@ class ModelClass(Model):
         pk_column_names = set(col.name for col in table.primary_key.columns)
         for constraint in sorted(table.constraints, key=_get_constraint_sort_key):
             if isinstance(constraint, ForeignKeyConstraint):
-                target_cls = self._tablename_to_classname(constraint.elements[0].column.table.name, inflect_engine)
+                target_cls = self._tablename_to_classname(constraint.elements[0].column.table.name)
                 if (detect_joined and self.parent_name == 'Base' and
                         set(_get_column_names(constraint)) == pk_column_names):
                     self.parent_name = target_cls
@@ -341,14 +341,15 @@ class ModelClass(Model):
         for association_table in association_tables:
             fk_constraints = [c for c in association_table.constraints if isinstance(c, ForeignKeyConstraint)]
             fk_constraints.sort(key=_get_constraint_sort_key)
-            target_cls = self._tablename_to_classname(fk_constraints[1].elements[0].column.table.name, inflect_engine)
+            target_cls = self._tablename_to_classname(fk_constraints[1].elements[0].column.table.name)
             relationship_ = ManyToManyRelationship(self.name, target_cls, association_table, inflect_engine)
             self._add_attribute(relationship_.preferred_name, relationship_)
 
     @staticmethod
-    def _tablename_to_classname(tablename, inflect_engine):
+    def _tablename_to_classname(tablename):
         camel_case_name = ''.join(part[:1].upper() + part[1:] for part in re.split(r'_|-', tablename))
-        return inflect_engine.singular_noun(camel_case_name) or camel_case_name
+        # return inflect_engine.singular_noun(camel_case_name) or camel_case_name
+        return camel_case_name
 
     def _add_attribute(self, attrname, value):
         attrname = tempname = _convert_to_valid_identifier(attrname)
