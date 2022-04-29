@@ -1,5 +1,13 @@
 # sqlalchemy-codegen
 
+github:https://github.com/ncepu-iDealStudio/sqlalchemy-codegen
+
+gitee:https://gitee.com/ncepu-bj/sqlalchemy-codegen
+
+document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-faeba859bfcf
+
+pypi:https://pypi.org/project/sqlalchemy-codegen/
+
 本项目fork自 [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) 作者： Kamil Sindi. 基于version 1.1.8.
 
 项目特性以及所做的改进工作:
