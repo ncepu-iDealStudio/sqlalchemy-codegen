@@ -239,6 +239,11 @@ class ImportCollector(OrderedDict):
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
 
+    def render_foreign_object(self, object_list: list):
+        text = ""
+        for object_ in object_list:
+            text += "\n"+"from .{0} import {1}".format(object_[0].lower()+object_[1:], object_)
+        return text
 
 class Model(object):
     def __init__(self, table):
@@ -741,6 +746,13 @@ class Base(DeclarativeBase):
                         print('from . import Base', file=outfile)
                     else:
                         print('metadata = MetaData()', file=outfile)
+
+                relationship_object = []
+                for attr, relationship in model.attributes.items():
+                    if isinstance(relationship, Relationship):
+                        relationship_object.append(relationship.target_cls)
+                if len(relationship_object) != 0:
+                    print(self.collector.render_foreign_object(relationship_object) + '\n\n', file=outfile)
 
                 print('\n', file=outfile)
                 print(model.render().rstrip('\n'), file=outfile)
