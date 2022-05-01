@@ -239,6 +239,11 @@ class ImportCollector(OrderedDict):
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
 
+    def render_foreign_object(self, object_list: list):
+        text = ""
+        for object_ in object_list:
+            text += "\n"+"from .{0} import {1}".format(object_[0].lower()+object_[1:], object_)
+        return text
 
 class Model(object):
     def __init__(self, table):
@@ -680,19 +685,27 @@ class BaseModel(db.Model):
 
     @classmethod
     def to_dict(cls, models):
-        # 查询结果为空
-        if len(models) == 0:
-            return []
-        # 查询结果不包含所有字段的情况
-        if isinstance(models[0], Row):
-            return [row._asdict() for row in models]
-        # 查询结果包含所有字段的情况
+        # 使用.all()查询的情况
+        if isinstance(models, list):
+            # 查询结果为空
+            if len(models) == 0:
+                return []
+            # 查询结果不包含所有字段的情况
+            if isinstance(models[0], Row):
+                return [row._asdict() for row in models]
+            # 查询结果包含所有字段的情况
+            else:
+                return [cls._asdict(model) for model in models]
+        # 使用.first()查询的情况
         else:
-            return [cls._asdict(model) for model in models]
+            if not models:
+                return {}
+            if isinstance(models, Row):
+                return models._asdict()
+            return cls._asdict(models)
 
     def _asdict(self):
-        return {c.key: getattr(self, c.key)
-                for c in inspect(self).mapper.column_attrs}
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 """
             else:
                 s = """\
@@ -711,19 +724,27 @@ class Base(DeclarativeBase):
 
     @classmethod
     def to_dict(cls, models):
-        # 查询结果为空
-        if len(models) == 0:
-            return []
-        # 查询结果不包含所有字段的情况
-        if isinstance(models[0], Row):
-            return [row._asdict() for row in models]
-        # 查询结果包含所有字段的情况
+        # 使用.all()查询的情况
+        if isinstance(models, list):
+            # 查询结果为空
+            if len(models) == 0:
+                return []
+            # 查询结果不包含所有字段的情况
+            if isinstance(models[0], Row):
+                return [row._asdict() for row in models]
+            # 查询结果包含所有字段的情况
+            else:
+                return [cls._asdict(model) for model in models]
+        # 使用.first()查询的情况
         else:
-            return [cls._asdict(model) for model in models]
+            if not models:
+                return {}
+            if isinstance(models, Row):
+                return models._asdict()
+            return cls._asdict(models)
 
     def _asdict(self):
-        return {c.key: getattr(self, c.key)
-                for c in inspect(self).mapper.column_attrs}
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 """
             outfile.write(s)
 
@@ -741,6 +762,13 @@ class Base(DeclarativeBase):
                         print('from . import Base', file=outfile)
                     else:
                         print('metadata = MetaData()', file=outfile)
+
+                relationship_object = []
+                for attr, relationship in model.attributes.items():
+                    if isinstance(relationship, Relationship):
+                        relationship_object.append(relationship.target_cls)
+                if len(relationship_object) != 0:
+                    print(self.collector.render_foreign_object(relationship_object) + '\n\n', file=outfile)
 
                 print('\n', file=outfile)
                 print(model.render().rstrip('\n'), file=outfile)
