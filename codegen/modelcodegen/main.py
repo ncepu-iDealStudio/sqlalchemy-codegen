@@ -8,9 +8,8 @@ import sys
 from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
-from sqlacodegen.codegen import CodeGenerator
+from codegen import CodeGenerator
 import sqlacodegen
-import sqlacodegen.dialects
 
 
 def import_dialect_specificities(engine):

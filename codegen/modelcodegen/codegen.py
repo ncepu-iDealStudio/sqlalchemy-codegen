@@ -239,11 +239,12 @@ class ImportCollector(OrderedDict):
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
 
-    def render_foreign_object(self, object_list: list):
+    def render_foreign_object(self, object_list):
         text = ""
         for object_ in object_list:
-            text += "\n"+"from .{0} import {1}".format(object_[0].lower()+object_[1:], object_)
+            text += "\n"+f"from .{object_[0]} import {object_[1]}"
         return text
+
 
 class Model(object):
     def __init__(self, table):
@@ -325,6 +326,7 @@ class ModelClass(Model):
         self.name = self._tablename_to_classname(table.name)
         self.children = []
         self.attributes = OrderedDict()
+        self.foreignKey_table_class = set()
 
         # Assign attribute names for columns
         for column in table.columns:
@@ -335,6 +337,7 @@ class ModelClass(Model):
         for constraint in sorted(table.constraints, key=_get_constraint_sort_key):
             if isinstance(constraint, ForeignKeyConstraint):
                 target_cls = self._tablename_to_classname(constraint.elements[0].column.table.name)
+                self.foreignKey_table_class.add((constraint.elements[0].column.table.name, target_cls))
                 if (detect_joined and self.parent_name == 'Base' and
                         set(_get_column_names(constraint)) == pk_column_names):
                     self.parent_name = target_cls
@@ -347,6 +350,7 @@ class ModelClass(Model):
             fk_constraints = [c for c in association_table.constraints if isinstance(c, ForeignKeyConstraint)]
             fk_constraints.sort(key=_get_constraint_sort_key)
             target_cls = self._tablename_to_classname(fk_constraints[1].elements[0].column.table.name)
+            self.foreignKey_table_class.add((fk_constraints[1].elements[0].column.table.name, target_cls))
             relationship_ = ManyToManyRelationship(self.name, target_cls, association_table, inflect_engine)
             self._add_attribute(relationship_.preferred_name, relationship_)
 
@@ -763,10 +767,8 @@ class Base(DeclarativeBase):
                     else:
                         print('metadata = MetaData()', file=outfile)
 
-                relationship_object = []
-                for attr, relationship in model.attributes.items():
-                    if isinstance(relationship, Relationship):
-                        relationship_object.append(relationship.target_cls)
+                relationship_object = model.foreignKey_table_class
+
                 if len(relationship_object) != 0:
                     print(self.collector.render_foreign_object(relationship_object) + '\n\n', file=outfile)
 
