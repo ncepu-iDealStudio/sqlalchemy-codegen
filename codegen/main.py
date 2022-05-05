@@ -57,6 +57,11 @@ def main():
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
     metadata = MetaData(engine)
+
+    # from sqlalchemy.engine import reflection
+    # bind = reflection.Inspector(inflect_engine)
+    # views = bind.get_view_names()
+
     tables = args.tables.split(',') if args.tables else None
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
     metadata.reflect(engine, args.schema, not args.noviews, tables)
@@ -71,7 +76,7 @@ def main():
 
     if args.controller_layer:
         os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
-        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.Model]
+        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
         table_dict = TableMetadata.get_tables_metadata(
             metadata=metadata,
             reflection_views=reflection_views,
