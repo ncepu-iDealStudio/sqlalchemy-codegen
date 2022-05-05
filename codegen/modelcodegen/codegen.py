@@ -251,6 +251,7 @@ class Model(object):
         super(Model, self).__init__()
         self.table = table
         self.schema = table.schema
+        self.foreignKey_table_class = set()
 
         # Adapt column types to the most reasonable generic types (ie. VARCHAR -> String)
         for column in table.columns:
@@ -326,7 +327,6 @@ class ModelClass(Model):
         self.name = self._tablename_to_classname(table.name)
         self.children = []
         self.attributes = OrderedDict()
-        self.foreignKey_table_class = set()
 
         # Assign attribute names for columns
         for column in table.columns:
