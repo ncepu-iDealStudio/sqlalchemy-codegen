@@ -762,10 +762,11 @@ class Base(DeclarativeBase):
                     # Render the collected imports
                     print(self.collector.render() + '\n\n', file=outfile)
 
-                    if any(isinstance(model, ModelClass) for model in self.models):
+                    if isinstance(model, ModelClass):
                         print('from . import Base', file=outfile)
                     else:
-                        print('metadata = MetaData()', file=outfile)
+                        print('from . import Base', file=outfile)
+                        print('metadata = Base.metadata', file=outfile)
 
                 relationship_object = model.foreignKey_table_class
 
