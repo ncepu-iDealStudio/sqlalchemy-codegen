@@ -71,11 +71,13 @@ def main():
                                  args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
 
     if args.models_layer:
-        os.makedirs(model_dir := os.path.join(outdir, 'models'), exist_ok=True)
+        model_dir = os.path.join(outdir, 'models')
+        os.makedirs(model_dir, exist_ok=True)
         generator.render(model_dir)
 
     if args.controller_layer:
-        os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
+        controller_dir = os.path.join(outdir, 'controller')
+        os.makedirs(controller_dir, exist_ok=True)
         reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
         table_dict = TableMetadata.get_tables_metadata(
             metadata=metadata,
