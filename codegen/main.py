@@ -71,7 +71,7 @@ def main():
 
     if args.controller_layer:
         os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
-        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.Model]
         table_dict = TableMetadata.get_tables_metadata(
             metadata=metadata,
             reflection_views=reflection_views,
