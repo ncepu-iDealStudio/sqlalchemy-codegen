@@ -1,4 +1,10 @@
-# sqlalchemy-codegen
+## sqlalchemy-codegen
+
+#### 功能说明
+这是一个能够基于sqlalchemy ORM框架，通过命令行的方式运行，可以自动生成相应的实体层(Model)和控制器层(controller)代码的工具；
+支持针对整个数据库来生成，也可以针对特定的表来生成相应的代码；同时也支持基于Flask框架来生成相应的代码；
+
+代码仓库和相关地址：
 
 github:https://github.com/ncepu-iDealStudio/sqlalchemy-codegen
 
@@ -9,6 +15,7 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
 本项目fork自 [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) 作者： Kamil Sindi. 基于version 1.1.8.
+在此基础上，我们做了大量的改进工作；
 
 项目特性以及所做的改进工作:
 * 支持生成控制器层，实现对基本实体的CRUD操作.
@@ -22,20 +29,8 @@ pypi:https://pypi.org/project/sqlalchemy-codegen/
 * 通过`--ignore-cols` 选项，可以在生成关联表时忽略特殊列。原始代码要求所有列都是外键，以便生成关联表；Example: `--ignore-cols id,inserted,updated`.
 * 添加支持 `--notables` 选项，支持仅仅生成model classes,即便是关联表
 
-## 安装
 
-使用 pip:
-```sh
-pip install sqlalchemy-codegen
-```
-
-不适用 pip:
-```sh
-git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
-cd sqlalchemy-codegen/
-python setup.py install
-```
-
+#### 如何贡献代码
 感谢您参与贡献代码，可通过以下方式获取代码:
 ```sh
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
@@ -45,12 +40,32 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 
 ```
 
-如何使用:
+#### 安装使用说明
+
+使用pip安装:
+```
+pip install sqlalchemy-codegen
+```
+
+使用其它方式安装:
+```
+git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
+cd sqlalchemy-codegen/
+python setup.py install
+
+使用方式(一般情形):
+
+```
+sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database  --models_layer --controller_layer --outdir dist
+'''
+
+使用方式(基于flask框架):
+
 '''
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
 '''
 
-使用范例:
+如:
 '''
 sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
 '''
