@@ -1,14 +1,19 @@
-# sqlalchemy-codegen
+## sqlalchemy-codegen
 
-github:https://github.com/ncepu-iDealStudio/sqlalchemy-codegen
+#### features
+This is a tool that can generate corresponding Model and controller layer codes based on the sqlalchemy ORM framework through command-line operation. It supports generating codes for the entire database or for specific tables. Additionally, it supports generating codes based on the Flask framework.
 
-gitee:https://gitee.com/ncepu-bj/sqlalchemy-codegen
+Code repository and related addresses: 
+github:https://github.com/ncepu-iDealStudio/sqlalchemy-codegen;
 
-document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-faeba859bfcf
+gitee:https://gitee.com/ncepu-bj/sqlalchemy-codegen;
+
+document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-faeba859bfcf;
 
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
-Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
+This Project Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
+We have made a great deal of improvement work.
 
 What's new and different:
 * Support for generate controller layer.
@@ -52,8 +57,9 @@ sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --mode
 example:
 ```sh
 sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
+```
+or:
 
-or
-
+```sh
 sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --models_layer --controller_layer --outdir dist
 ```

@@ -6,6 +6,7 @@ import importlib
 import os
 import sys
 
+import sqlalchemy
 from sqlalchemy.engine import create_engine
 from sqlalchemy.schema import MetaData
 
@@ -57,6 +58,11 @@ def main():
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
     metadata = MetaData(engine)
+
+    # from sqlalchemy.engine import reflection
+    # bind = reflection.Inspector(inflect_engine)
+    # views = bind.get_view_names()
+
     tables = args.tables.split(',') if args.tables else None
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
     metadata.reflect(engine, args.schema, not args.noviews, tables)
@@ -66,12 +72,17 @@ def main():
                                  args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
 
     if args.models_layer:
-        os.makedirs(model_dir := os.path.join(outdir, 'models'), exist_ok=True)
+        model_dir = os.path.join(outdir, 'models')
+        os.makedirs(model_dir, exist_ok=True)
         generator.render(model_dir)
 
     if args.controller_layer:
-        os.makedirs(controller_dir := os.path.join(outdir, 'controller'), exist_ok=True)
+        controller_dir = os.path.join(outdir, 'controller')
+        os.makedirs(controller_dir, exist_ok=True)
         reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+        views = sqlalchemy.inspect(engine).get_view_names()
+        for table_name in set(reflection_views) ^ set(views):
+            print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
         table_dict = TableMetadata.get_tables_metadata(
             metadata=metadata,
             reflection_views=reflection_views,
