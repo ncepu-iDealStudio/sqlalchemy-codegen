@@ -15,7 +15,7 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
 本项目fork自 [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) 作者： Kamil Sindi. 基于version 1.1.8.
-在此基础上，我们做了大量的改进工作；
+在此基础上，做了大量的改进和优化工作；
 
 项目特性以及所做的改进工作:
 * 支持生成控制器层，实现对基本实体的CRUD操作.
