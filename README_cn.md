@@ -36,7 +36,6 @@ pypi:https://pypi.org/project/sqlalchemy-codegen/
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
-python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port>/<database-name> --flask --models_layer --controller_layer --outdir ddist[--tables <tablenames>] [--notables] 
 
 ```
 
