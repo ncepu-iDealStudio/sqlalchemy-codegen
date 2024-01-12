@@ -3,4 +3,4 @@ SQLAlchemy==2.0.25
 pymysql==1.1.0
 loguru==0.7.2
 inflect==7.0.0
-greenlet==3.0.3s
+greenlet==3.0.3
