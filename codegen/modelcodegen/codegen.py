@@ -1,19 +1,19 @@
 """Contains the code generation logic and helper functions."""
 from __future__ import unicode_literals, division, print_function, absolute_import
 
+import inspect
 import os
+import re
+import sys
 from collections import defaultdict
 from keyword import iskeyword
-import inspect
-import sys
-import re
 
+import sqlalchemy
 from sqlalchemy import (Enum, ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, UniqueConstraint, Table,
                         Column)
 from sqlalchemy.schema import ForeignKey
-from sqlalchemy.util import OrderedDict
 from sqlalchemy.types import Boolean, String
-import sqlalchemy
+from sqlalchemy.util import OrderedDict
 
 try:
     from sqlalchemy.sql.expression import text, TextClause
@@ -227,20 +227,39 @@ def _render_index(index):
     return _flask_prepend + 'Index({0!r}, {1})'.format(index.name, ', '.join(columns))
 
 
+# class ImportCollector(OrderedDict):
+#
+#     def add_import(self, obj):
+#         type_ = type(obj) if not isinstance(obj, type) else obj
+#         pkgname = 'sqlalchemy' if type_.__name__ in sqlalchemy.__all__ else type_.__module__  # @UndefinedVariable
+#         self.add_literal_import(pkgname, type_.__name__)
+#
+#     #
+#     def add_literal_import(self, pkgname, name):
+#         names = self.setdefault(pkgname, set())
+#         names.add(name)
+#
+#     def render(self):
+#         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
+#                          for package, names in self.items())
+
 class ImportCollector(OrderedDict):
     def add_import(self, obj):
         type_ = type(obj) if not isinstance(obj, type) else obj
-        pkgname = 'sqlalchemy' if type_.__name__ in sqlalchemy.__all__ else type_.__module__  # @UndefinedVariable
+        # 检查 obj 是 type 类型，并且有一个有效的 __module__ 属性
+        if hasattr(type_, '__module__') and type_.__module__:
+            pkgname = type_.__module__
+        else:
+            pkgname = 'sqlalchemy'  # 如果没有 __module__，默认为 sqlalchemy
         self.add_literal_import(pkgname, type_.__name__)
-
     def add_literal_import(self, pkgname, name):
+        # 使用 dict.setdefault 确保存在，并添加名称
         names = self.setdefault(pkgname, set())
         names.add(name)
-
     def render(self):
+        # 对每个包的导入名称进行排序，并格式化输出
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
-
 
 class Model(object):
     def __init__(self, table):

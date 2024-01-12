@@ -2,13 +2,14 @@
 # -*- coding:utf-8 -*-
 
 # file:tablesMetadata.py.py
-# author:Nathan
+# author:Nathan; update by:jackiex
 # datetime:2021/8/26 14:56
 # software: PyCharm
 
 """
     Get metadata of all tables
 """
+
 from .commons import str_to_all_small, str_to_little_camel_case, str_to_big_camel_case
 
 
