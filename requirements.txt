@@ -10,7 +10,6 @@ pydantic==2.5.3
 pydantic_core==2.14.6
 PyMySQL==1.1.0
 sqlacodegen==2.3.0
-SQLAlchemy==1.4.51
-sqlalchemy-codegen==1.1
+SQLAlchemy==2.0.20
 typing_extensions==4.9.0
 win32-setctime==1.1.0
