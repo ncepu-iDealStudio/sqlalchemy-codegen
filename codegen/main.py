@@ -41,11 +41,11 @@ def generate_model_code(engine, metadata, out_dir, args):
     model_dir = os.path.join(out_dir, 'models')
     os.makedirs(model_dir, exist_ok=True)
 
-    generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
+    model_generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
                                    args.nojoined, args.noinflect, args.nobackrefs,
                                    args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
 
-    generator.render(model_dir)
+    model_generator.render(model_dir)
 
 
 # define generator function for controller layer
@@ -71,7 +71,7 @@ def generate_controller_code(engine, metadata, out_dir, args):
     )
 
     Controller_generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
-    Controller_generator.controller_codegen(controller_dir=controller_dir)
+    Controller_generator.render(controller_dir=controller_dir)
 
 
 def main():
@@ -120,7 +120,7 @@ def main():
     if args.models_layer:
         generate_model_code(engine, metadata, outdir, args)
 
-        # 如果参数中要求生成控制器层的代码
+    # 如果参数中要求生成控制器层的代码
     if args.controller_layer:
         generate_controller_code(engine, metadata, outdir, args)
 
