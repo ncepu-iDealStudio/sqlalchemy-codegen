@@ -15,6 +15,8 @@ from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import Boolean, String
 from sqlalchemy.util import OrderedDict
 
+from codegen.modelcodegen.template.filetemplate import FileTemplate
+
 try:
     from sqlalchemy.sql.expression import text, TextClause
 except ImportError:
@@ -260,6 +262,12 @@ class ImportCollector(OrderedDict):
         # 对每个包的导入名称进行排序，并格式化输出
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
+
+    def render_foreign_object(self, object_list):
+        text = ""
+        for object_ in object_list:
+            text += "\n" + f"from .{object_[0]} import {object_[1]}"
+        return text
 
 class Model(object):
     def __init__(self, table):
@@ -734,84 +742,12 @@ class CodeGenerator(object):
         # Render the model tables and classes
         with open(os.path.join(outdir, f"__init__.py"), "w", encoding="utf-8") as outfile:
             if self.flask:
-                s = """\
-    #!/usr/bin/env python
-    # -*- coding:utf-8 -*-
-
-    from sqlalchemy import inspect
-    from sqlalchemy.engine import Row
-    from flask_sqlalchemy import SQLAlchemy
-
-    db = SQLAlchemy()
-
-
-    class BaseModel(db.Model):
-        __abstract__ = True
-
-        @classmethod
-        def to_dict(cls, models):
-            # 使用.all()查询的情况
-            if isinstance(models, list):
-                # 查询结果为空
-                if len(models) == 0:
-                    return []
-                # 查询结果不包含所有字段的情况
-                if isinstance(models[0], Row):
-                    return [row._asdict() for row in models]
-                # 查询结果包含所有字段的情况
-                else:
-                    return [cls._asdict(model) for model in models]
-            # 使用.first()查询的情况
+                outfile.write(FileTemplate.flask_init_template)
+#         
             else:
-                if not models:
-                    return {}
-                if isinstance(models, Row):
-                    return models._asdict()
-                return cls._asdict(models)
-
-        def _asdict(self):
-            return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    """
-            else:
-                s = """\
-    #!/usr/bin/env python
-    # -*- coding:utf-8 -*-
-
-    from sqlalchemy import inspect
-    from sqlalchemy.engine import Row
-    from sqlalchemy.ext.declarative import declarative_base
-
-    DeclarativeBase = declarative_base()
+                outfile.write(FileTemplate.other_init_template)
 
 
-    class Base(DeclarativeBase):
-        __abstract__ = True
-
-        @classmethod
-        def to_dict(cls, models):
-            # 使用.all()查询的情况
-            if isinstance(models, list):
-                # 查询结果为空
-                if len(models) == 0:
-                    return []
-                # 查询结果不包含所有字段的情况
-                if isinstance(models[0], Row):
-                    return [row._asdict() for row in models]
-                # 查询结果包含所有字段的情况
-                else:
-                    return [cls._asdict(model) for model in models]
-            # 使用.first()查询的情况
-            else:
-                if not models:
-                    return {}
-                if isinstance(models, Row):
-                    return models._asdict()
-                return cls._asdict(models)
-
-        def _asdict(self):
-            return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    """
-            outfile.write(s)
 
         for model in self.models:
             outfilename = os.path.join(outdir, f"{model.table.name}.py")
