@@ -12,7 +12,7 @@ from sqlalchemy.schema import MetaData
 
 from . import modelcodegen
 from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
-from .modelcodegen.codegen import CodeGenerator
+from .modelcodegen.codegen import CodeGenerator as ModelCodeGenerator
 from .utils.tablesMetadata import TableMetadata
 
 
@@ -22,6 +22,48 @@ def import_dialect_specificities(engine):
         importlib.import_module(dialect_name, 'modelcodegen.dialects')
     except ImportError:
         pass
+
+# define generator function for model layer
+def generate_model_code(engine,outdir,args):
+    
+    metadata = MetaData()
+    metadata.reflect(engine, args.schema, not args.noviews, tables)
+    
+    tables = args.tables.split(',') if args.tables else None
+    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
+    
+        
+    model_dir = os.path.join(outdir, 'models')
+    os.makedirs(model_dir, exist_ok=True)
+
+    generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
+                                args.nojoined, args.noinflect, args.nobackrefs,
+                                args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+
+    generator.render(model_dir)
+
+
+
+# define generator function for controller layer   
+def generate_controller_code(engine,outdir,args):
+    metadata = MetaData()
+    metadata.bind = engine
+    
+    controller_dir = os.path.join(outdir, 'controller')
+    os.makedirs(controller_dir, exist_ok=True)
+    
+    reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+    views = sqlalchemy.inspect(engine).get_view_names()
+   
+    for table_name in set(reflection_views) ^ set(views):
+        print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
+    table_dict = TableMetadata.get_tables_metadata(
+        metadata=metadata,
+        reflection_views=reflection_views,
+    )
+
+    generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
+    generator.controller_codegen(controller_dir=controller_dir)
 
 
 def main():
@@ -62,43 +104,18 @@ def main():
 
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
-    metadata = MetaData()
-
-
-    tables = args.tables.split(',') if args.tables else None
-    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
-    metadata.reflect(engine, args.schema, not args.noviews, tables)
+   
     outdir = args.outdir if args.outdir else sys.stdout
-
-    generator = CodeGenerator(metadata, args.noindexes, args.noconstraints,
-                                 args.nojoined, args.noinflect, args.nobackrefs,
-                                 args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
-
-
-    # 如果参数中要求生成model层代码，创建输出目标文件夹
+    
+    
+     # 如果参数中要求生成model层代码
     if args.models_layer:
-        model_dir = os.path.join(outdir, 'models')
-        os.makedirs(model_dir, exist_ok=True)
-        generator.render(model_dir)
+        generate_model_code(engine,outdir,args)        
+            
 
     # 如果参数中要求生成控制器层的代码
     if args.controller_layer:
-        controller_dir = os.path.join(outdir, 'controller')
-        os.makedirs(controller_dir, exist_ok=True)
-        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
-        views = sqlalchemy.inspect(engine).get_view_names()
-        metadata.bind = engine
-        for table_name in set(reflection_views) ^ set(views):
-            print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
-        table_dict = TableMetadata.get_tables_metadata(
-            metadata=metadata,
-            reflection_views=reflection_views,
-        )
-
-        generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
-
-        generator.controller_codegen(controller_dir=controller_dir)
-
+        generate_controller_code(engine,outdir,args)
 
 if __name__ == '__main__':
     main()
