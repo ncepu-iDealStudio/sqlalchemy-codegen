@@ -8,4 +8,8 @@ if __name__ == '__main__':
     os.system("rd /s/q results")
     # os.mkdir("results")
     os.system("pip install .")
+<<<<<<< HEAD
     os.system('sqlalchemy-codegen mysql+pymysql://root123456@127.0.0.1:3306/testdb?charset=utf8mb4 --outdir "results" --models_layer --controller_layer --flask')
+=======
+    os.system('sqlalchemy-codegen mysql+pymysql://dev:123456@127.0.0.1:3306/codegen_db?charset=utf8mb4 --outdir "results" --models_layer --controller_layer --flask')
+>>>>>>> release

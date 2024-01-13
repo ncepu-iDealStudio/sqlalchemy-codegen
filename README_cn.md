@@ -14,9 +14,6 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
-本项目fork自 [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) 作者： Kamil Sindi. 基于version 1.1.8.
-在此基础上，做了大量的改进和优化工作；
-
 项目特性以及所做的改进工作:
 * 支持生成控制器层，实现对基本实体的CRUD操作.
 * 支持生成实体层文件夹，并将每个表对应的实体文件分离出来单独存放.
@@ -39,32 +36,31 @@ pip install -r requirements.txt
 
 ```
 
-#### 安装使用说明
+#### 本地安装使用说明
 
-使用pip安装:
-```
-pip install sqlalchemy-codegen
-```
-
-使用其它方式安装:
+1 本地运行安装:
 ```
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
 cd sqlalchemy-codegen/
 python setup.py install
+```
+
+2 使用线上编译发布后的版本
+
+'''
+pip install sqlalchemy-codegen
+'''
+
 
 使用方式(一般情形):
-
-```
+'''
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database  --models_layer --controller_layer --outdir dist
 '''
+
+
 
 使用方式(基于flask框架):
 
 '''
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
-'''
-
-如:
-'''
-sqlalchemy-codegen mysql+pymysql://root:123456@127.0.0.1:3306/testdb --flask --models_layer --controller_layer --outdir dist
 '''
