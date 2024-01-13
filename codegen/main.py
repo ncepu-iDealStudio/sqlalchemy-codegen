@@ -1,4 +1,11 @@
-""" """
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+# file:main.py
+# update by:jackiex
+# datetime:2024/1/13 14:56
+# software: PyCharm
+
 from __future__ import unicode_literals, division, print_function, absolute_import
 
 import argparse
@@ -22,6 +29,50 @@ def import_dialect_specificities(engine):
         importlib.import_module(dialect_name, 'modelcodegen.dialects')
     except ImportError:
         pass
+
+
+# define generator function for model layer
+def generate_model_code(engine, metadata, out_dir, args):
+    tables = args.tables.split(',') if args.tables else None
+    metadata.reflect(engine, args.schema, not args.noviews, tables)
+
+    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
+
+    model_dir = os.path.join(out_dir, 'models')
+    os.makedirs(model_dir, exist_ok=True)
+
+    model_generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
+                                   args.nojoined, args.noinflect, args.nobackrefs,
+                                   args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+
+    model_generator.render(model_dir)
+
+
+# define generator function for controller layer
+def generate_controller_code(engine, metadata, out_dir, args):
+    metadata.bind = engine
+
+    controller_dir = os.path.join(out_dir, 'controller')
+    os.makedirs(controller_dir, exist_ok=True)
+
+    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
+    generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
+                                   args.nojoined, args.noinflect, args.nobackrefs,
+                                   args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+    reflection_views = [model.table.name for model in generator.models if
+                        type(model) == modelcodegen.codegen.ModelTable]
+    views = sqlalchemy.inspect(engine).get_view_names()
+
+    for table_name in set(reflection_views) ^ set(views):
+        print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
+    table_dict = TableMetadata.get_tables_metadata(
+        metadata=metadata,
+        reflection_views=reflection_views,
+    )
+
+    Controller_generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
+    Controller_generator.render(controller_dir=controller_dir)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Generates SQLAlchemy model code from an existing database.')
@@ -63,40 +114,15 @@ def main():
     import_dialect_specificities(engine)
     metadata = MetaData()
 
-
-    tables = args.tables.split(',') if args.tables else None
-    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
-    metadata.reflect(engine, args.schema, not args.noviews, tables)
     outdir = args.outdir if args.outdir else sys.stdout
-
-    model_generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
-                                 args.nojoined, args.noinflect, args.nobackrefs,
-                                 args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
-
 
     # 如果参数中要求生成model层代码
     if args.models_layer:
-        model_dir = os.path.join(outdir, 'models')
-        os.makedirs(model_dir, exist_ok=True)
-        model_generator.render(model_dir)
+        generate_model_code(engine, metadata, outdir, args)
 
     # 如果参数中要求生成控制器层的代码
     if args.controller_layer:
-        controller_dir = os.path.join(outdir, 'controller')
-        os.makedirs(controller_dir, exist_ok=True)
-        reflection_views = [model.table.name for model in model_generator.models if type(model) == modelcodegen.codegen.ModelTable]
-        views = sqlalchemy.inspect(engine).get_view_names()
-        metadata.bind = engine
-        for table_name in set(reflection_views) ^ set(views):
-            print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
-        table_dict = TableMetadata.get_tables_metadata(
-            metadata=metadata,
-            reflection_views=reflection_views,
-        )
-
-        controller_generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
-
-        controller_generator.render(controller_dir=controller_dir)
+        generate_controller_code(engine, metadata, outdir, args)
 
 
 if __name__ == '__main__':
