@@ -47,20 +47,18 @@ python setup.py install
 
 2 使用线上编译发布后的版本
 
-'''
+```
 pip install sqlalchemy-codegen
-'''
-
+```
 
 使用方式(一般情形):
-'''
+```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database  --models_layer --controller_layer --outdir dist
-'''
-
+```
 
 
 使用方式(基于flask框架):
 
-'''
+```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
-'''
+```
