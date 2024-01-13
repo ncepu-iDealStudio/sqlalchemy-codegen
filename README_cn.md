@@ -15,6 +15,7 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
 项目特性以及所做的改进工作:
+* 已经全面支持pyhton3.12,以及重要依赖包的最新版本：sqlacodegen3.0.0rc3，SQLAlchemy2.0.25等.
 * 支持生成控制器层，实现对基本实体的CRUD操作.
 * 支持生成实体层文件夹，并将每个表对应的实体文件分离出来单独存放.
 * 使用`sqlalchemy-codegen` 代替 `flask-sqlacodegen`.
