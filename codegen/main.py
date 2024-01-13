@@ -12,7 +12,7 @@ from sqlalchemy.schema import MetaData
 
 from . import modelcodegen
 from .controllercodegen.codegenerator import CodeGenerator as ControllerCodeGenerator
-from .modelcodegen.codegen import CodeGenerator
+from .modelcodegen.codegen import CodeGenerator as ModelCodeGenerator
 from .utils.tablesMetadata import TableMetadata
 
 
@@ -22,7 +22,6 @@ def import_dialect_specificities(engine):
         importlib.import_module(dialect_name, 'modelcodegen.dialects')
     except ImportError:
         pass
-
 
 def main():
     parser = argparse.ArgumentParser(description='Generates SQLAlchemy model code from an existing database.')
@@ -70,22 +69,22 @@ def main():
     metadata.reflect(engine, args.schema, not args.noviews, tables)
     outdir = args.outdir if args.outdir else sys.stdout
 
-    generator = CodeGenerator(metadata, args.noindexes, args.noconstraints,
+    model_generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
                                  args.nojoined, args.noinflect, args.nobackrefs,
                                  args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
 
 
-    # 如果参数中要求生成model层代码，创建输出目标文件夹
+    # 如果参数中要求生成model层代码
     if args.models_layer:
         model_dir = os.path.join(outdir, 'models')
         os.makedirs(model_dir, exist_ok=True)
-        generator.render(model_dir)
+        model_generator.render(model_dir)
 
     # 如果参数中要求生成控制器层的代码
     if args.controller_layer:
         controller_dir = os.path.join(outdir, 'controller')
         os.makedirs(controller_dir, exist_ok=True)
-        reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+        reflection_views = [model.table.name for model in model_generator.models if type(model) == modelcodegen.codegen.ModelTable]
         views = sqlalchemy.inspect(engine).get_view_names()
         metadata.bind = engine
         for table_name in set(reflection_views) ^ set(views):
@@ -95,9 +94,9 @@ def main():
             reflection_views=reflection_views,
         )
 
-        generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
+        controller_generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
 
-        generator.controller_codegen(controller_dir=controller_dir)
+        controller_generator.render(controller_dir=controller_dir)
 
 
 if __name__ == '__main__':

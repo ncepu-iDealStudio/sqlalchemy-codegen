@@ -29,7 +29,7 @@ class CodeGenerator(object):
         self.flask = flask
         self.databaseUrl = databaseUrl
 
-    def controller_codegen(self, controller_dir):
+    def render(self, controller_dir):
 
         try:
             codes = {}
