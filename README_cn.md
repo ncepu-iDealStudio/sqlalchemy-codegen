@@ -40,7 +40,7 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 
 #### 本地安装使用说明
 
-1 本地运行安装:
+1 本地包编译打包后运行安装
 ```
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
 cd sqlalchemy-codegen/
@@ -53,14 +53,12 @@ python setup.py install
 pip install sqlalchemy-codegen
 ```
 
-使用方式(一般情形):
+3 使用方式(一般情形):
 ```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database  --models_layer --controller_layer --outdir dist
 ```
 
-
-使用方式(基于flask框架):
-
+4 使用方式(基于flask框架)
 ```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
 ```
