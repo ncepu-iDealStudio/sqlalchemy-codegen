@@ -1,13 +1,11 @@
 """Contains the code generation logic and helper functions."""
-
 from __future__ import unicode_literals, division, print_function, absolute_import
 
 import inspect
-import os.path
+import os
 import re
 import sys
 from collections import defaultdict
-from inspect import ArgSpec
 from keyword import iskeyword
 
 import sqlalchemy
@@ -16,6 +14,8 @@ from sqlalchemy import (Enum, ForeignKeyConstraint, PrimaryKeyConstraint, CheckC
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import Boolean, String
 from sqlalchemy.util import OrderedDict
+
+from codegen.modelcodegen.template.filetemplate import FileTemplate
 
 try:
     from sqlalchemy.sql.expression import text, TextClause
@@ -28,16 +28,20 @@ _re_column_name = re.compile(r'(?:(["`]?)(?:.*)\1\.)?(["`]?)(.*)\2')
 _re_enum_check_constraint = re.compile(r"(?:(?:.*?)\.)?(.*?) IN \((.+)\)")
 _re_enum_item = re.compile(r"'(.*?)(?<!\\)'")
 _re_invalid_identifier = re.compile(r'[^a-zA-Z0-9_]' if sys.version_info[0] < 3 else r'(?u)\W')
+_re_invalid_relationship = re.compile(r'[^a-zA-Z0-9._()\[\]{}= \'",]')
 
 _re_first_cap = re.compile('(.)([A-Z][a-z]+)')
 _re_all_cap = re.compile('([a-z0-9])([A-Z])')
 
 _flask_prepend = 'db.'
 
+_dataclass = False
+
 
 class _DummyInflectEngine(object):
     def singular_noun(self, noun):
         return noun
+
     def plural_noun(self, noun):  # needed for backrefs
         import inflect
         inflect_engine = inflect.engine()
@@ -95,12 +99,12 @@ def _get_common_fk_constraints(table1, table2):
 
 def _getargspec_init(method):
     try:
-        return inspect.getargspec(method)
+        return inspect.getfullargspec(method)
     except TypeError:
         if method is object.__init__:
-            return ArgSpec(['self'], None, None, None)
+            return inspect.getfullargspec(lambda self: None)
         else:
-            return ArgSpec(['self'], 'args', 'kwargs', None)
+            return inspect.getfullargspec(lambda self, *args, **kwargs: None)
 
 
 def _render_column_type(coltype):
@@ -225,26 +229,45 @@ def _render_index(index):
     return _flask_prepend + 'Index({0!r}, {1})'.format(index.name, ', '.join(columns))
 
 
+# class ImportCollector(OrderedDict):
+#
+#     def add_import(self, obj):
+#         type_ = type(obj) if not isinstance(obj, type) else obj
+#         pkgname = 'sqlalchemy' if type_.__name__ in sqlalchemy.__all__ else type_.__module__  # @UndefinedVariable
+#         self.add_literal_import(pkgname, type_.__name__)
+#
+#     #
+#     def add_literal_import(self, pkgname, name):
+#         names = self.setdefault(pkgname, set())
+#         names.add(name)
+#
+#     def render(self):
+#         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
+#                          for package, names in self.items())
+
 class ImportCollector(OrderedDict):
     def add_import(self, obj):
         type_ = type(obj) if not isinstance(obj, type) else obj
-        pkgname = 'sqlalchemy' if type_.__name__ in sqlalchemy.__all__ else type_.__module__  # @UndefinedVariable
+        # 检查 obj 是 type 类型，并且有一个有效的 __module__ 属性
+        if hasattr(type_, '__module__') and type_.__module__:
+            pkgname = type_.__module__
+        else:
+            pkgname = 'sqlalchemy'  # 如果没有 __module__，默认为 sqlalchemy
         self.add_literal_import(pkgname, type_.__name__)
-
     def add_literal_import(self, pkgname, name):
+        # 使用 dict.setdefault 确保存在，并添加名称
         names = self.setdefault(pkgname, set())
         names.add(name)
-
     def render(self):
+        # 对每个包的导入名称进行排序，并格式化输出
         return '\n'.join('from {0} import {1}'.format(package, ', '.join(sorted(names)))
                          for package, names in self.items())
 
     def render_foreign_object(self, object_list):
         text = ""
         for object_ in object_list:
-            text += "\n"+f"from .{object_[0]} import {object_[1]}"
+            text += "\n" + f"from .{object_[0]} import {object_[1]}"
         return text
-
 
 class Model(object):
     def __init__(self, table):
@@ -322,21 +345,24 @@ class ModelTable(Model):
 class ModelClass(Model):
     parent_name = 'Base'
 
-    def __init__(self, table, association_tables, inflect_engine, detect_joined):
+    def __init__(self, table, association_tables, inflect_engine, detect_joined, collector):
         super(ModelClass, self).__init__(table)
-        self.name = self._tablename_to_classname(table.name)
+        self.name = self._tablename_to_classname(table.name, inflect_engine)
         self.children = []
         self.attributes = OrderedDict()
 
         # Assign attribute names for columns
         for column in table.columns:
             self._add_attribute(column.name, column)
+            if _dataclass:
+                if column.type.python_type.__module__ != 'builtins':
+                    collector.add_literal_import(column.type.python_type.__module__, column.type.python_type.__name__)
 
         # Add many-to-one relationships
         pk_column_names = set(col.name for col in table.primary_key.columns)
         for constraint in sorted(table.constraints, key=_get_constraint_sort_key):
             if isinstance(constraint, ForeignKeyConstraint):
-                target_cls = self._tablename_to_classname(constraint.elements[0].column.table.name)
+                target_cls = self._tablename_to_classname(constraint.elements[0].column.table.name, inflect_engine)
                 self.foreignKey_table_class.add((constraint.elements[0].column.table.name, target_cls))
                 if (detect_joined and self.parent_name == 'Base' and
                         set(_get_column_names(constraint)) == pk_column_names):
@@ -349,16 +375,15 @@ class ModelClass(Model):
         for association_table in association_tables:
             fk_constraints = [c for c in association_table.constraints if isinstance(c, ForeignKeyConstraint)]
             fk_constraints.sort(key=_get_constraint_sort_key)
-            target_cls = self._tablename_to_classname(fk_constraints[1].elements[0].column.table.name)
+            target_cls = self._tablename_to_classname(fk_constraints[1].elements[0].column.table.name, inflect_engine)
             self.foreignKey_table_class.add((fk_constraints[1].elements[0].column.table.name, target_cls))
             relationship_ = ManyToManyRelationship(self.name, target_cls, association_table, inflect_engine)
             self._add_attribute(relationship_.preferred_name, relationship_)
 
     @staticmethod
-    def _tablename_to_classname(tablename):
+    def _tablename_to_classname(tablename, inflect_engine):
         camel_case_name = ''.join(part[:1].upper() + part[1:] for part in re.split(r'_|-', tablename))
-        # return inflect_engine.singular_noun(camel_case_name) or camel_case_name
-        return camel_case_name
+        return inflect_engine.singular_noun(camel_case_name) or camel_case_name
 
     def _add_attribute(self, attrname, value):
         attrname = tempname = _convert_to_valid_identifier(attrname)
@@ -380,7 +405,13 @@ class ModelClass(Model):
             child.add_imports(collector)
 
     def render(self):
+        global _dataclass
+
         text = 'class {0}({1}):\n'.format(self.name, self.parent_name)
+
+        if _dataclass:
+            text = '@dataclass\n' + text
+
         text += '    __tablename__ = {0!r}\n'.format(self.table.name)
 
         # Render constraints and indexes as __table_args__
@@ -415,6 +446,9 @@ class ModelClass(Model):
         for attr, column in self.attributes.items():
             if isinstance(column, Column):
                 show_name = attr != column.name
+                if _dataclass:
+                    text += '    ' + attr + ' : ' + column.type.python_type.__name__ + '\n'
+
                 text += '    {0} = {1}\n'.format(attr, _render_column(column, show_name))
 
         # Render relationships
@@ -450,7 +484,8 @@ class Relationship(object):
             delimiter, end = ', ', ')'
 
         args.extend([key + '=' + value for key, value in self.kwargs.items()])
-        return text + delimiter.join(args) + end
+
+        return _re_invalid_relationship.sub('_', text + delimiter.join(args) + end)
 
     def make_backref(self, relationships, classes):
         backref = self.backref_name
@@ -506,9 +541,10 @@ class ManyToOneRelationship(Relationship):
         # common_fk_constraints = _get_common_fk_constraints(constraint.table, constraint.elements[0].column.table)
         # if len(common_fk_constraints) > 1:
         # self.kwargs['primaryjoin'] = "'{0}.{1} == {2}.{3}'".format(source_cls, constraint.columns[0], target_cls, constraint.elements[0].column.name)
-        if len(constraint.elements) > 1:  #  or 
-            self.kwargs['primaryjoin'] = "'and_({0})'".format(', '.join(['{0}.{1} == {2}.{3}'.format(source_cls, k.parent.name, target_cls, k.column.name)
-                        for k in constraint.elements]))
+        if len(constraint.elements) > 1:  # or
+            self.kwargs['primaryjoin'] = "'and_({0})'".format(
+                ', '.join(['{0}.{1} == {2}.{3}'.format(source_cls, k.parent.name, target_cls, k.column.name)
+                           for k in constraint.elements]))
         else:
             self.kwargs['primaryjoin'] = "'{0}.{1} == {2}.{3}'".format(source_cls, column_names[0], target_cls,
                                                                        constraint.elements[0].column.name)
@@ -547,7 +583,7 @@ class CodeGenerator(object):
 
     def __init__(self, metadata, noindexes=False, noconstraints=False,
                  nojoined=False, noinflect=False, nobackrefs=False,
-                 flask=False, ignore_cols=None, noclasses=False, nocomments=False, notables=False):
+                 flask=False, ignore_cols=None, noclasses=False, nocomments=False, notables=False, dataclass=False):
         super(CodeGenerator, self).__init__()
 
         if noinflect:
@@ -558,13 +594,18 @@ class CodeGenerator(object):
 
         # exclude these column names from consideration when generating association tables
         _ignore_columns = ignore_cols or []
-        
+
         self.flask = flask
         if not self.flask:
             global _flask_prepend
             _flask_prepend = ''
 
         self.nocomments = nocomments
+
+        self.dataclass = dataclass
+        if self.dataclass:
+            global _dataclass
+            _dataclass = True
 
         # Pick association tables from the metadata into their own set, don't process them normally
         links = defaultdict(lambda: [])
@@ -573,7 +614,8 @@ class CodeGenerator(object):
             # Link tables have exactly two foreign key constraints and all columns are involved in them
             # except for special columns like id, inserted, and updated
             fk_constraints = [constr for constr in table.constraints if isinstance(constr, ForeignKeyConstraint)]
-            if len(fk_constraints) == 2 and all(col.foreign_keys for col in table.columns if col.name not in _ignore_columns):
+            if len(fk_constraints) == 2 and all(
+                    col.foreign_keys for col in table.columns if col.name not in _ignore_columns):
                 association_tables.add(table.name)
                 tablename = sorted(fk_constraints, key=_get_constraint_sort_key)[0].elements[0].column.table.name
                 links[tablename].append(table)
@@ -623,13 +665,13 @@ class CodeGenerator(object):
 
             # Only generate classes when notables is set to True
             if notables:
-                model = ModelClass(table, links[table.name], inflect_engine, not nojoined)
+                model = ModelClass(table, links[table.name], inflect_engine, not nojoined, self.collector)
                 classes[model.name] = model
             elif not table.primary_key or table.name in association_tables or noclasses:
                 # Only form model classes for tables that have a primary key and are not association tables
                 model = ModelTable(table)
             elif not noclasses:
-                model = ModelClass(table, links[table.name], inflect_engine, not nojoined)
+                model = ModelClass(table, links[table.name], inflect_engine, not nojoined, self.collector)
                 classes[model.name] = model
 
             self.models.append(model)
@@ -657,15 +699,42 @@ class CodeGenerator(object):
         if self.flask:
             # Add Flask-SQLAlchemy support
             self.collector.add_literal_import('flask_sqlalchemy', 'SQLAlchemy')
-            parent_name = 'BaseModel'
+            parent_name = 'db.Model'
 
             for model in classes.values():
                 if model.parent_name == 'Base':
                     model.parent_name = parent_name
-        # else:
-        #     self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
-        #     self.collector.add_literal_import('sqlalchemy', 'MetaData')
+        else:
+            self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
+            self.collector.add_literal_import('sqlalchemy', 'MetaData')
 
+        if self.dataclass:
+            self.collector.add_literal_import('dataclasses', 'dataclass')
+
+    # def render(self, outfile=sys.stdout):
+    #
+    #     print(self.header, file=outfile)
+    #
+    #     # Render the collected imports
+    #     print(self.collector.render() + '\n\n', file=outfile)
+    #
+    #     if self.flask:
+    #         print('db = SQLAlchemy()', file=outfile)
+    #     else:
+    #         if any(isinstance(model, ModelClass) for model in self.models):
+    #             print('Base = declarative_base()\nmetadata = Base.metadata', file=outfile)
+    #         else:
+    #             print('metadata = MetaData()', file=outfile)
+    #
+    #     # Render the model tables and classes
+    #     for model in self.models:
+    #         print('\n\n', file=outfile)
+    #         print(model.render().rstrip('\n'), file=outfile)
+    #
+    #     if self.footer:
+    #         print(self.footer, file=outfile)
+
+    # 重写render方法
     def render(self, outdir):
         if not os.path.exists(outdir):
             os.mkdir(outdir)
@@ -673,84 +742,12 @@ class CodeGenerator(object):
         # Render the model tables and classes
         with open(os.path.join(outdir, f"__init__.py"), "w", encoding="utf-8") as outfile:
             if self.flask:
-                s = """\
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
-from sqlalchemy import inspect
-from sqlalchemy.engine import Row
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-
-
-class BaseModel(db.Model):
-    __abstract__ = True
-
-    @classmethod
-    def to_dict(cls, models):
-        # 使用.all()查询的情况
-        if isinstance(models, list):
-            # 查询结果为空
-            if len(models) == 0:
-                return []
-            # 查询结果不包含所有字段的情况
-            if isinstance(models[0], Row):
-                return [row._asdict() for row in models]
-            # 查询结果包含所有字段的情况
+                outfile.write(FileTemplate.flask_init_template)
+#         
             else:
-                return [cls._asdict(model) for model in models]
-        # 使用.first()查询的情况
-        else:
-            if not models:
-                return {}
-            if isinstance(models, Row):
-                return models._asdict()
-            return cls._asdict(models)
-
-    def _asdict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-"""
-            else:
-                s = """\
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
-from sqlalchemy import inspect
-from sqlalchemy.engine import Row
-from sqlalchemy.ext.declarative import declarative_base
-
-DeclarativeBase = declarative_base()
+                outfile.write(FileTemplate.other_init_template)
 
 
-class Base(DeclarativeBase):
-    __abstract__ = True
-
-    @classmethod
-    def to_dict(cls, models):
-        # 使用.all()查询的情况
-        if isinstance(models, list):
-            # 查询结果为空
-            if len(models) == 0:
-                return []
-            # 查询结果不包含所有字段的情况
-            if isinstance(models[0], Row):
-                return [row._asdict() for row in models]
-            # 查询结果包含所有字段的情况
-            else:
-                return [cls._asdict(model) for model in models]
-        # 使用.first()查询的情况
-        else:
-            if not models:
-                return {}
-            if isinstance(models, Row):
-                return models._asdict()
-            return cls._asdict(models)
-
-    def _asdict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-"""
-            outfile.write(s)
 
         for model in self.models:
             outfilename = os.path.join(outdir, f"{model.table.name}.py")
@@ -778,3 +775,4 @@ class Base(DeclarativeBase):
 
                 if self.footer:
                     print(self.footer, file=outfile)
+
