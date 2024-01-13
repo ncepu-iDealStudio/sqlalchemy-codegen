@@ -30,42 +30,39 @@ def import_dialect_specificities(engine):
     except ImportError:
         pass
 
+
 # define generator function for model layer
-def generate_model_code(engine,outdir,args):
-    
-    metadata = MetaData()
+def generate_model_code(engine, metadata, out_dir, args):
     tables = args.tables.split(',') if args.tables else None
-    metadata.reflect(engine, args.schema, not args.noviews, tables)    
-    
+    metadata.reflect(engine, args.schema, not args.noviews, tables)
+
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
-    
-        
-    model_dir = os.path.join(outdir, 'models')
+
+    model_dir = os.path.join(out_dir, 'models')
     os.makedirs(model_dir, exist_ok=True)
 
     generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
-                                args.nojoined, args.noinflect, args.nobackrefs,
-                                args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+                                   args.nojoined, args.noinflect, args.nobackrefs,
+                                   args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
 
     generator.render(model_dir)
 
 
-
-# define generator function for controller layer   
-def generate_controller_code(engine,outdir,args):
-    metadata = MetaData()
+# define generator function for controller layer
+def generate_controller_code(engine, metadata, out_dir, args):
     metadata.bind = engine
-    
-    controller_dir = os.path.join(outdir, 'controller')
+
+    controller_dir = os.path.join(out_dir, 'controller')
     os.makedirs(controller_dir, exist_ok=True)
-    
+
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
     generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
-                                args.nojoined, args.noinflect, args.nobackrefs,
-                                args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
-    reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
+                                   args.nojoined, args.noinflect, args.nobackrefs,
+                                   args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
+    reflection_views = [model.table.name for model in generator.models if
+                        type(model) == modelcodegen.codegen.ModelTable]
     views = sqlalchemy.inspect(engine).get_view_names()
-   
+
     for table_name in set(reflection_views) ^ set(views):
         print(f"\033[33mWarnning: Table {table_name} required PrimaryKey!\033[0m")
     table_dict = TableMetadata.get_tables_metadata(
@@ -115,18 +112,18 @@ def main():
 
     engine = create_engine(args.url)
     import_dialect_specificities(engine)
-   
-    outdir = args.outdir if args.outdir else sys.stdout
-    
-    
-     # 如果参数中要求生成model层代码
-    if args.models_layer:
-        generate_model_code(engine,outdir,args)        
-            
+    metadata = MetaData()
 
-    # 如果参数中要求生成控制器层的代码
+    outdir = args.outdir if args.outdir else sys.stdout
+
+    # 如果参数中要求生成model层代码
+    if args.models_layer:
+        generate_model_code(engine, metadata, outdir, args)
+
+        # 如果参数中要求生成控制器层的代码
     if args.controller_layer:
-        generate_controller_code(engine,outdir,args)
+        generate_controller_code(engine, metadata, outdir, args)
+
 
 if __name__ == '__main__':
     main()
