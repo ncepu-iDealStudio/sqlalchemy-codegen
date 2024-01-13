@@ -12,8 +12,6 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
-This Project Fork of [flask-sqlacodegen](https://github.com/ksindi/flask-sqlacodegen) by Kamil Sindi. Based off of version 1.1.8.
-We have made a great deal of improvement work.
 
 What's new and different:
 * Support for generate controller layer.
