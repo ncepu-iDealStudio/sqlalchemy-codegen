@@ -1,4 +1,11 @@
-""" """
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+# file:main.py
+# update by:jackiex
+# datetime:2024/1/13 14:56
+# software: PyCharm
+
 from __future__ import unicode_literals, division, print_function, absolute_import
 
 import argparse
@@ -27,9 +34,9 @@ def import_dialect_specificities(engine):
 def generate_model_code(engine,outdir,args):
     
     metadata = MetaData()
-    metadata.reflect(engine, args.schema, not args.noviews, tables)
-    
     tables = args.tables.split(',') if args.tables else None
+    metadata.reflect(engine, args.schema, not args.noviews, tables)    
+    
     ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
     
         
@@ -52,6 +59,10 @@ def generate_controller_code(engine,outdir,args):
     controller_dir = os.path.join(outdir, 'controller')
     os.makedirs(controller_dir, exist_ok=True)
     
+    ignore_cols = args.ignore_cols.split(',') if args.ignore_cols else None
+    generator = ModelCodeGenerator(metadata, args.noindexes, args.noconstraints,
+                                args.nojoined, args.noinflect, args.nobackrefs,
+                                args.flask, ignore_cols, args.noclasses, args.nocomments, args.notables)
     reflection_views = [model.table.name for model in generator.models if type(model) == modelcodegen.codegen.ModelTable]
     views = sqlalchemy.inspect(engine).get_view_names()
    
@@ -62,8 +73,8 @@ def generate_controller_code(engine,outdir,args):
         reflection_views=reflection_views,
     )
 
-    generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
-    generator.controller_codegen(controller_dir=controller_dir)
+    Controller_generator = ControllerCodeGenerator(table_dict, args.flask, args.url)
+    Controller_generator.controller_codegen(controller_dir=controller_dir)
 
 
 def main():
