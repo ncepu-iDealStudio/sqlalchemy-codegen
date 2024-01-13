@@ -14,6 +14,7 @@ pypi:https://pypi.org/project/sqlalchemy-codegen/
 
 
 What's new and different:
+* Support python3.12 and sqlacodegen3.0.0rc3 、SQLAlchemy2.0.25.
 * Support for generate controller layer.
 * Support for generate Model layer include many model py files.
 * Support for Flask-SQLAlchemy syntax using `--flask` option.
