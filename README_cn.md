@@ -15,6 +15,7 @@ document:https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-
 pypi:https://pypi.org/project/sqlalchemy-codegen/
 
 项目特性以及所做的改进工作:
+* 已经全面支持pyhton3.12,以及重要依赖包的最新版本：sqlacodegen3.0.0rc3，SQLAlchemy2.0.25等.
 * 支持生成控制器层，实现对基本实体的CRUD操作.
 * 支持生成实体层文件夹，并将每个表对应的实体文件分离出来单独存放.
 * 使用`sqlalchemy-codegen` 代替 `flask-sqlacodegen`.
@@ -39,7 +40,7 @@ python -m codegen.main mysql+pymysql://<username>:<password>@<database-ip>:<port
 
 #### 本地安装使用说明
 
-1 本地运行安装:
+1 本地包编译打包后运行安装
 ```
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen.git
 cd sqlalchemy-codegen/
@@ -52,14 +53,12 @@ python setup.py install
 pip install sqlalchemy-codegen
 ```
 
-使用方式(一般情形):
+3 使用方式(一般情形):
 ```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database  --models_layer --controller_layer --outdir dist
 ```
 
-
-使用方式(基于flask框架):
-
+4 使用方式(基于flask框架)
 ```
 sqlalchemy-codegen mysql+pymysql://root:password@ip:port/database --flask --models_layer --controller_layer --outdir dist
 ```
