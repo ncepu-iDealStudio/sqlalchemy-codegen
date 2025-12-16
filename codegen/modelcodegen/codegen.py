@@ -705,7 +705,7 @@ class CodeGenerator(object):
                 if model.parent_name == 'Base':
                     model.parent_name = parent_name
         else:
-            self.collector.add_literal_import('sqlalchemy.ext.declarative', 'declarative_base')
+            self.collector.add_literal_import('sqlalchemy.orm', 'DeclarativeBase')
             self.collector.add_literal_import('sqlalchemy', 'MetaData')
 
         if self.dataclass:

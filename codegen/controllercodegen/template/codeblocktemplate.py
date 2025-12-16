@@ -17,6 +17,7 @@ class CodeBlockTemplate(object):
 import datetime
 import math
 
+from sqlalchemy import select, func
 from ..models import db
 from ..models.{model_name} import {parent_model}
 """
@@ -25,6 +26,7 @@ from ..models.{model_name} import {parent_model}
 import datetime
 import math
 
+from sqlalchemy import select, func
 from . import session
 from ..models.{model_name} import {parent_model}
 """
@@ -94,7 +96,7 @@ from ..models.{model_name} import {parent_model}
 
     results_primary_keys = """'{primary_key}': []"""
 
-    multi_primary_key_result = """'{primary_key}': res.first().{primary_key},
+    multi_primary_key_result = """'{primary_key}': res.{primary_key},
                 """
 
     add_result_primary_key = """'{primary_key}': model.{primary_key},
