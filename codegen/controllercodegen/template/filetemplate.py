@@ -76,11 +76,11 @@ class {class_name}({parent_model}):
             page = int(kwargs.get('Page', 1))
             size = int(kwargs.get('Size', 10))
             
-            {model_lower}_info = db.session.query(cls).filter(*filter_list)
+            stmt = select(cls).filter(*filter_list)
             
-            count = {model_lower}_info.count()
+            count = db.session.scalar(select(func.count()).select_from(stmt.subquery()))
             pages = math.ceil(count / size)
-            {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
+            {model_lower}_info = db.session.scalars(stmt.limit(size).offset((page - 1) * size)).all()
 
             results = cls.to_dict({model_lower}_info)
             return {{'code': "200", 'message': "成功！", 'totalCount': count, 'totalPage': pages, 'data': results}}
@@ -98,16 +98,17 @@ class {class_name}({parent_model}):
         try:
             filter_list = []
             {filter_list_init}
-            res = db.session.query(cls).filter(*filter_list).with_for_update()
+            stmt = select(cls).filter(*filter_list).with_for_update()
+            res = db.session.scalars(stmt).first()
             
-            if not res.first():
+            if not res:
                 return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
 
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
             }}
-            res.delete()
+            db.session.delete(res)
             db.session.commit()
 
             return {{'code': "200", 'message': "成功！", 'data': results}}
@@ -127,9 +128,10 @@ class {class_name}({parent_model}):
         try:
             filter_list = []
             {filter_list_init}
-            res = db.session.query(cls).filter(*filter_list).with_for_update()
+            stmt = select(cls).filter(*filter_list).with_for_update()
+            res = db.session.scalars(stmt).first()
 
-            if not res.first():
+            if not res:
                 return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
@@ -137,7 +139,9 @@ class {class_name}({parent_model}):
                 {results_primary_keys}
             }}
             
-            res.update(kwargs)
+            for key, value in kwargs.items():
+                if hasattr(res, key):
+                    setattr(res, key, value)
             db.session.commit()
             
             return {{'code': "200", 'message': "成功！", 'data': results}}
@@ -184,11 +188,11 @@ class {class_name}({parent_model}):
             page = int(kwargs.get('Page', 1))
             size = int(kwargs.get('Size', 10))
 
-            {model_lower}_info = session.query(cls).filter(*filter_list)
+            stmt = select(cls).filter(*filter_list)
 
-            count = {model_lower}_info.count()
+            count = session.scalar(select(func.count()).select_from(stmt.subquery()))
             pages = math.ceil(count / size)
-            {model_lower}_info = {model_lower}_info.limit(size).offset((page - 1) * size).all()
+            {model_lower}_info = session.scalars(stmt.limit(size).offset((page - 1) * size)).all()
 
             results = cls.to_dict({model_lower}_info)
             return {{'code': "200", 'message': "成功！", 'totalCount': count, 'totalPage': pages, 'data': results}}
@@ -206,16 +210,17 @@ class {class_name}({parent_model}):
         try:
             filter_list = []
             {filter_list_init}
-            res = session.query(cls).filter(*filter_list).with_for_update()
+            stmt = select(cls).filter(*filter_list).with_for_update()
+            res = session.scalars(stmt).first()
 
-            if not res.first():
+            if not res:
                 return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
                 'delete_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 {results_primary_keys}
             }}
-            res.delete()
+            session.delete(res)
             session.commit()
 
             return {{'code': "200", 'message': "成功！", 'data': results}}
@@ -235,9 +240,10 @@ class {class_name}({parent_model}):
         try:
             filter_list = []
             {filter_list_init}
-            res = session.query(cls).filter(*filter_list).with_for_update()
+            stmt = select(cls).filter(*filter_list).with_for_update()
+            res = session.scalars(stmt).first()
 
-            if not res.first():
+            if not res:
                 return {{'code': "5001", 'message': "数据库错误", 'error': "数据不存在"}}
                 
             results = {{
@@ -245,7 +251,9 @@ class {class_name}({parent_model}):
                 {results_primary_keys}
             }}
 
-            res.update(kwargs)
+            for key, value in kwargs.items():
+                if hasattr(res, key):
+                    setattr(res, key, value)
             session.commit()
 
             return {{'code': "200", 'message': "成功！", 'data': results}}

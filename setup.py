@@ -1,20 +1,21 @@
-import sys
-
 from setuptools import setup, find_packages
 
 import codegen
 
-extra_requirements = ()
-if sys.version_info < (2, 7):
-    extra_requirements = ('argparse',)
-
 setup(
     name='sqlalchemy-codegen',
     description='Automatic generate model layer and controller layer code for SQLAlchemy with Flask support',
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     version=codegen.version,
     author='iDeal-ncepu',
+    author_email='idealstudio@ncepu.edu.cn',
+    url='https://github.com/ncepu-iDealStudio/sqlalchemy-codegen',
+    project_urls={
+        'Documentation': 'https://idealstudio-ncepu.yuque.com/docs/share/b5dcc5ff-fcba-4efd-8955-faeba859bfcf',
+        'Source': 'https://github.com/ncepu-iDealStudio/sqlalchemy-codegen',
+        'Tracker': 'https://github.com/ncepu-iDealStudio/sqlalchemy-codegen/issues',
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -24,32 +25,31 @@ setup(
         'Topic :: Software Development :: Code Generators',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
-    keywords=['sqlalchemy','flask-sqlalchemy', 'sqlacodegen', 'flask'],
+    keywords=['sqlalchemy', 'flask-sqlalchemy', 'sqlacodegen', 'flask', 'code-generator', 'orm'],
     license='MIT',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'test']),
     package_data={'': ['*.json', '*.conf']},
-    install_requires=(
-        'SQLAlchemy >= 0.6.0',
-        'inflect >= 0.2.0',
-        'pymysql>= 1.0.2',
-        'loguru >= 0.6.0',
-        'sqlacodegen>=2.3.0',
-        'greenlet>=1.1.2',
-    ) + extra_requirements,
-
-
+    python_requires='>=3.10',
+    install_requires=[
+        'SQLAlchemy>=2.0.0',
+        'inflect>=7.0.0',
+        'sqlacodegen>=3.0.0',
+    ],
+    extras_require={
+        'mysql': ['pymysql>=1.0.0'],
+        'postgresql': ['psycopg2-binary>=2.9.0'],
+        'dev': [
+            'pytest>=7.0.0',
+            'flask>=3.0.0',
+            'flask-sqlalchemy>=3.1.0',
+        ],
+    },
     zip_safe=False,
     entry_points={
         'console_scripts': [

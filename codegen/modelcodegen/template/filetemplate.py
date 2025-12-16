@@ -56,9 +56,7 @@ class BaseModel(db.Model):
 
 from sqlalchemy import inspect
 from sqlalchemy.engine import Row
-from sqlalchemy.ext.declarative import declarative_base
-
-DeclarativeBase = declarative_base()
+from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):

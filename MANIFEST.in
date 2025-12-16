@@ -1,1 +1,2 @@
-include LICENSE README.md tox.ini
+include LICENSE README.md README_cn.md tox.ini requirements.txt
+recursive-include codegen *.py
