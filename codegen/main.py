@@ -114,7 +114,17 @@ def main():
     import_dialect_specificities(engine)
     metadata = MetaData()
 
-    outdir = args.outdir if args.outdir else sys.stdout
+    # 如果要生成 model 或 controller 层代码，必须指定输出目录
+    if args.models_layer or args.controller_layer:
+        if not args.outdir:
+            outdir = input('Please enter the output directory (e.g., dist): ').strip()
+            if not outdir:
+                print('Output directory is required. Exiting.\n', file=sys.stderr)
+                return
+        else:
+            outdir = args.outdir
+    else:
+        outdir = args.outdir if args.outdir else '.'
 
     # 如果参数中要求生成model层代码
     if args.models_layer:

@@ -18,8 +18,8 @@ import datetime
 import math
 
 from sqlalchemy import select, func
-from ..models import db
-from ..models.{model_name} import {parent_model}
+from models import db
+from models.{model_name} import {parent_model}
 """
 
     imports = """
@@ -27,8 +27,8 @@ import datetime
 import math
 
 from sqlalchemy import select, func
-from . import session
-from ..models.{model_name} import {parent_model}
+from controller import session
+from models.{model_name} import {parent_model}
 """
 
     add_column_init = """{column}=kwargs.get('{column}'),
