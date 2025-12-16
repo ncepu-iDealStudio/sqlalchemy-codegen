@@ -20,7 +20,7 @@
 - sqlacodegen 3.0.0rc3
 - Flask-SQLAlchemy（可选）
 
-<<<<<<< HEAD
+
 项目特性以及所做的改进工作:
 * 已经全面支持pyhton3.12,以及重要依赖包的最新版本：sqlacodegen3.0.0rc3，SQLAlchemy2.0.25等.
 * 支持生成控制器层，实现对基本实体的CRUD操作.
