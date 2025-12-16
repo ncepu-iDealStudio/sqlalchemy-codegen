@@ -41,9 +41,7 @@
 git clone https://gitee.com/ncepu-bj/sqlalchemy-codegen
 python -m venv env
 pip install -r requirements.txt
-=======
-### 项目结构
->>>>>>> dev
+
 
 ```
 sqlalchemy-codegen/
